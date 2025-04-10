@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{43D6353E-AE3D-424E-8D9D-B274AB342A3E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ValheimRcon</RootNamespace>
+    <AssemblyName>ValheimRcon</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>Libs\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="assembly_utils">
+      <HintPath>Libs\assembly_utils.dll</HintPath>
+    </Reference>
+    <Reference Include="assembly_valheim">
+      <HintPath>Libs\assembly_valheim.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx">
+      <HintPath>Libs\BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx.Harmony">
+      <HintPath>Libs\BepInEx.Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="netstandard">
+      <HintPath>Libs\netstandard.dll</HintPath>
+    </Reference>
+    <Reference Include="Splatform">
+      <HintPath>Libs\Splatform.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="UnityEngine">
+      <HintPath>Libs\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>Libs\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>Libs\UnityEngine.UI.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Commands\ActionCommand.cs" />
+    <Compile Include="Commands\AddAdmin.cs" />
+    <Compile Include="Commands\AddPermitted.cs" />
+    <Compile Include="Commands\Ban.cs" />
+    <Compile Include="Commands\BanSteamId.cs" />
+    <Compile Include="Commands\CommandArgs.cs" />
+    <Compile Include="Commands\CommandResult.cs" />
+    <Compile Include="Commands\Damage.cs" />
+    <Compile Include="Commands\GetServerStats.cs" />
+    <Compile Include="Commands\GiveItem.cs" />
+    <Compile Include="Commands\Heal.cs" />
+    <Compile Include="Commands\IRconCommand.cs" />
+    <Compile Include="Commands\Kick.cs" />
+    <Compile Include="Commands\PlayerRconCommand.cs" />
+    <Compile Include="Commands\PrintAdminList.cs" />
+    <Compile Include="Commands\PrintBanlist.cs" />
+    <Compile Include="Commands\PrintPermitlist.cs" />
+    <Compile Include="Commands\RconCommand.cs" />
+    <Compile Include="Commands\RemoveAdmin.cs" />
+    <Compile Include="Commands\RemovePermitted.cs" />
+    <Compile Include="Commands\SayChat.cs" />
+    <Compile Include="Commands\SayPing.cs" />
+    <Compile Include="Commands\ServerLogs.cs" />
+    <Compile Include="Commands\ShowMessage.cs" />
+    <Compile Include="Commands\ShowPlayers.cs" />
+    <Compile Include="Commands\SpawnObject.cs" />
+    <Compile Include="Commands\TeleportPlayer.cs" />
+    <Compile Include="Commands\Unban.cs" />
+    <Compile Include="Commands\WorldSave.cs" />
+    <Compile Include="Core\AsynchronousSocketListener.cs" />
+    <Compile Include="Core\PacketType.cs" />
+    <Compile Include="Core\RconCommandHandler.cs" />
+    <Compile Include="Core\RconCommandReceiver.cs" />
+    <Compile Include="Core\RconPacket.cs" />
+    <Compile Include="Core\RconPeer.cs" />
+    <Compile Include="Log.cs" />
+    <Compile Include="PlayerUtils.cs" />
+    <Compile Include="Plugin.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RconCommandsUtil.cs" />
+    <Compile Include="RconProxy.cs" />
+    <Compile Include="ThreadingUtil.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy $(TargetPath) $(SolutionDir)$(TargetFileName)</PostBuildEvent>
+  </PropertyGroup>
+</Project>
