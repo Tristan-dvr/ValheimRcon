@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace ValheimRcon.Core
 {
     internal class AsynchronousSocketListener
     {
+        private static readonly TimeSpan UnauthorizedClientLifetime = TimeSpan.FromSeconds(30);
+
         internal delegate void MessageReceived(RconPeer peer, RconPacket package);
         internal event MessageReceived OnMessage;
 
@@ -14,7 +17,8 @@ namespace ValheimRcon.Core
         private readonly IPAddress _address;
         private readonly int _port;
         private readonly Socket _listener;
-        private readonly List<RconPeer> _clients = new List<RconPeer>();
+        private readonly HashSet<RconPeer> _clients = new HashSet<RconPeer>();
+        private readonly HashSet<RconPeer> _waitingForDisconnect = new HashSet<RconPeer>();
         private IDisposable _acceptThread;
 
         public AsynchronousSocketListener(IPAddress ipAddress, int port)
@@ -42,38 +46,62 @@ namespace ValheimRcon.Core
             }
         }
 
-        public void Send(RconPeer peer, RconPacket packet)
+        public async Task SendAsync(RconPeer peer, RconPacket packet)
         {
-            var socket = peer.socket;
-            var byteData = packet.Serialize();
-            // Begin sending the data to the remote device.  
-            socket.BeginSend(byteData, 0, byteData.Length, 0, SendCallback, socket);
+            try
+            {
+                var socket = peer.socket;
+                var byteData = packet.Serialize();
+                var bytesSent = await socket.SendAsync(new ArraySegment<byte>(byteData), SocketFlags.None);
+
+                Log.Debug($"Sent {bytesSent} bytes to client [{peer.Endpoint}]");
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+            }
         }
 
         public void Update()
         {
-            for (int i = _clients.Count - 1; i >= 0; i--)
+            foreach (var client in _clients)
             {
-                var client = _clients[i];
-                //  TODO:   maybe disconnect if there are no packages to receive long time
-                if (client.socket.Connected && !IsDead(client.socket))
+                if (!IsConnected(client))
                 {
-                    TryReceive(client);
+                    Disconnect(client);
+                }
+                else if (IsUnauthorizedTimeout(client))
+                {
+                    Log.Warning($"Unauthorized timeout [{client.Endpoint}]");
+                    Disconnect(client);
                 }
                 else
                 {
-                    Disconnect(client);
-                    _clients.RemoveAt(i);
+                    TryReceive(client);
                 }
             }
+
+            foreach (var client in _waitingForDisconnect)
+            {
+                _clients.Remove(client);
+                DisconnectPeer(client);
+            }
+            _waitingForDisconnect.Clear();
         }
 
         public void Close()
         {
             _listener.Close();
             _acceptThread?.Dispose();
-            _clients.ForEach(c => c.Dispose());
+            foreach (var client in _clients)
+                client.Dispose();
+            _waitingForDisconnect.Clear();
             _clients.Clear();
+        }
+
+        public void Disconnect(RconPeer peer)
+        {
+            _waitingForDisconnect.Add(peer);
         }
 
         private void TryAcceptClientThread()
@@ -111,8 +139,7 @@ namespace ValheimRcon.Core
             // Create the state object.  
             var state = new RconPeer(socket);
 
-            var ip = GetSocketEndPoint(socket);
-            Log.Debug($"Client connected [{ip}]");
+            Log.Debug($"Client connected [{state.Endpoint}]");
 
             //  Work with collection in main thread only
             ThreadingUtil.RunInMainThread(() => _clients.Add(state));
@@ -121,8 +148,7 @@ namespace ValheimRcon.Core
         private void OnPackageReceived(RconPeer peer, int readCount)
         {
             var socket = peer.socket;
-            var ip = GetSocketEndPoint(socket);
-            Log.Debug($"Got package from client, {readCount} bytes [{ip}]");
+            Log.Debug($"Got package from client, {readCount} bytes [{peer.Endpoint}]");
 
             var package = new RconPacket(peer.Buffer);
 
@@ -132,41 +158,24 @@ namespace ValheimRcon.Core
             Array.Clear(peer.Buffer, 0, peer.Buffer.Length);
         }
 
-        private void Disconnect(RconPeer peer)
+        private void DisconnectPeer(RconPeer peer)
         {
             var socket = peer.socket;
-            var ip = GetSocketEndPoint(socket);
-            Log.Debug($"Client disconnected [{ip}]");
+            Log.Debug($"Client disconnected [{peer.Endpoint}]");
             peer.Dispose();
         }
 
-        private void SendCallback(IAsyncResult ar)
+        private static bool IsConnected(RconPeer peer)
         {
-            try
-            {
-                // Retrieve the socket from the state object.  
-                var socket = (Socket)ar.AsyncState;
-
-                // Complete sending the data to the remote device.  
-                int bytesSent = socket.EndSend(ar);
-                var ip = GetSocketEndPoint(socket);
-                Log.Debug($"Sent {bytesSent} bytes to client [{ip}]");
-
-            }
-            catch (Exception e)
-            {
-                Log.Error(e);
-            }
+            var socket = peer.socket;
+            return socket.Connected
+                && !(socket.Poll(0, SelectMode.SelectRead) && socket.Available == 0);
         }
 
-        private static bool IsDead(Socket socket)
+        private static bool IsUnauthorizedTimeout(RconPeer peer)
         {
-            return socket.Poll(0, SelectMode.SelectRead) && socket.Available == 0;
-        }
-
-        private static string GetSocketEndPoint(Socket socket)
-        {
-            return socket.RemoteEndPoint?.ToString() ?? string.Empty;
+            return !peer.Authentificated
+                && DateTime.Now - peer.created > UnauthorizedClientLifetime;
         }
     }
 

@@ -5,20 +5,19 @@ namespace ValheimRcon.Core
 {
     internal class RconPeer : IDisposable
     {
-        // Size of receive buffer.  
         internal const int BufferSize = 4096;
-
-        // Receive buffer.  
+ 
         internal readonly byte[] Buffer = new byte[BufferSize];
-
-        // Client socket.
         public readonly Socket socket;
+        public readonly DateTime created;
 
         public bool Authentificated { get; private set; }
+        public string Endpoint => socket.RemoteEndPoint?.ToString() ?? string.Empty;
 
         public RconPeer(Socket workSocket)
         {
             socket = workSocket;
+            created = DateTime.Now;
         }
 
         public void SetAuthentificated(bool authentificated) => Authentificated = authentificated;

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
-using System.Net.Sockets;
 using System.Text.RegularExpressions;
 
 namespace ValheimRcon.Core
@@ -36,8 +35,17 @@ namespace ValheimRcon.Core
             {
                 case PacketType.Login:
                     {
+                        if (peer.Authentificated)
+                        {
+                            Log.Error($"Already authorized [{peer.Endpoint}]");
+                            await _socketListener.SendAsync(peer, new RconPacket(packet.requestId, PacketType.Command, "Already authorized"));
+                            _socketListener.Disconnect(peer);
+                            break;
+                        }
+
                         RconPacket result;
-                        if (string.Equals(packet.payload.Trim(), _password))
+                        var success = string.Equals(packet.payload.Trim(), _password);
+                        if (success)
                         {
                             peer.SetAuthentificated(true);
                             result = new RconPacket(packet.requestId, PacketType.Command, "Logic success");
@@ -47,13 +55,23 @@ namespace ValheimRcon.Core
                             result = new RconPacket(-1, PacketType.Command, "Login failed");
                         }
 
-                        //  TODO:   maybe disconnect right after sending packet if login failed
                         Log.Debug($"Login result {result}");
-                        _socketListener.Send(peer, result);
+                        await _socketListener.SendAsync(peer, result);
+
+                        if (!success)
+                            _socketListener.Disconnect(peer);
                         break;
                     }
                 case PacketType.Command:
                     {
+                        if (!peer.Authentificated)
+                        {
+                            Log.Warning($"Not authorized [{peer.Endpoint}]");
+                            await _socketListener.SendAsync(peer, new RconPacket(packet.requestId, packet.type, "Unauthorized"));
+                            _socketListener.Disconnect(peer);
+                            break;
+                        }
+
                         // strip slash if present
                         var payload = packet.payload.TrimStart('/');
 
@@ -64,20 +82,17 @@ namespace ValheimRcon.Core
                         string command = data[0];
                         data.RemoveAt(0);
 
-                        var response = peer.Authentificated
-                            ? await _commandHandler(command, data)
-                            : "Unauthorized";
-                        //  TODO:   maybe disconnect right after sending packet if unauthorized
+                        var response = await _commandHandler(command, data);
 
                         var result = new RconPacket(packet.requestId, packet.type, response);
                         Log.Debug($"Command result {command} - {result}");
-                        _socketListener.Send(peer, result);
+                        await _socketListener.SendAsync(peer, result);
                         break;
                     }
                 default:
-                    //  TODO:   maybe disconnect right after sending packet
-                    Log.Error($"Unknown packet type: {packet}");
-                    _socketListener.Send(peer, new RconPacket(packet.requestId, PacketType.Error, "Cannot handle command"));
+                    Log.Error($"Unknown packet type: {packet} [{peer.Endpoint}]");
+                    await _socketListener.SendAsync(peer, new RconPacket(packet.requestId, PacketType.Error, "Cannot handle command"));
+                    _socketListener.Disconnect(peer);
                     break;
             }
         }
