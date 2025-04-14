@@ -1,60 +1,31 @@
-﻿using BepInEx;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 
 namespace ValheimRcon.Commands
 {
-    internal class ShowPlayers : IRconCommand
+    internal class ShowPlayers : RconCommand
     {
-        private static readonly string TempFilePath = Path.Combine(Paths.BepInExRootPath, 
-            "Debug", 
-            "online_players.txt");
+        private StringBuilder _builder = new StringBuilder();
 
-        public string Command => "players";
+        public override string Command => "players";
 
-        private StringBuilder builder = new StringBuilder();
-
-        public ShowPlayers()
+        protected override string OnHandle(CommandArgs args)
         {
-            FileHelpers.EnsureDirectoryExists(TempFilePath);
-        }
-
-        public Task<CommandResult> HandleCommandAsync(CommandArgs args)
-        {
-            builder.Clear();
+            _builder.Clear();
             var online = ZNet.instance.GetPeers().Count;
+            _builder.AppendFormat("Online {0}\n", online);
 
             foreach (var player in ZNet.instance.GetPeers())
             {
-                builder.AppendFormat("{0}:{1} - {2}({3})",
+                _builder.AppendFormat("{0}:{1} - {2}({3})",
                     player.GetSteamId(),
                     player.m_playerName,
                     player.GetRefPos(),
                     ZoneSystem.GetZone(player.GetRefPos()));
 
-                builder.AppendLine();
+                _builder.AppendLine();
             }
 
-            File.WriteAllText(TempFilePath, builder.ToString());
-
-            return Task.FromResult(new CommandResult
-            {
-                Text = $"Online: {online}\n{GetDisplayResult(builder.ToString())}",
-                AttachedFilePath = TempFilePath,
-            });
-        }
-
-        private static string GetDisplayResult(string result)
-        {
-            if (result.Length > 100)
-            {
-                return $"{result.Substring(0, 100)}...";
-            }
-            else
-            {
-                return result;
-            }
+            return _builder.ToString();
         }
     }
 }

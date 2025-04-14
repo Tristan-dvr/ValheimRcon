@@ -6,6 +6,12 @@ namespace ValheimRcon
 {
     public static class RconCommandsUtil
     {
+        public const int MaxMessageLength = 800;
+
+        public static string Truncate(string message) => message.Length > MaxMessageLength
+            ? message.Substring(0, MaxMessageLength)
+            : message;
+
         public static void RegisterAllCommands(Assembly assembly)
         {
             if (RconProxy.Instance == null)

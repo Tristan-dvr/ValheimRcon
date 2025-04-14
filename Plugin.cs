@@ -5,6 +5,7 @@ using Splatform;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using UnityEngine;
 using ValheimRcon.Commands;
 
@@ -24,6 +25,8 @@ namespace ValheimRcon
         public static ConfigEntry<string> ServerChatName;
 
         private string _logsPath;
+        private DiscordService _discordService;
+        private StringBuilder _builder = new StringBuilder();
 
         public static readonly UserInfo CommandsUserInfo = new UserInfo
         {
@@ -41,23 +44,36 @@ namespace ValheimRcon
             DiscordUrl = Config.Bind("2. Discord", "Webhook url", "", "Discord webhook for sending command results");
             ServerChatName = Config.Bind("3. Chat", "Server name", "Server", "Name of server to display messages sent with rcon command");
 
+            CommandsUserInfo.Name = ServerChatName.Value;
+
+            _discordService = new DiscordService(DiscordUrl.Value);
+
             DontDestroyOnLoad(new GameObject(nameof(RconProxy), typeof(RconProxy)));
-            RconProxy.Instance.OnCommandCompleted += SendResultToDiscord;
+            RconProxy.Instance.OnCommandCompleted += OnCommandCompleted;
 
             RconCommandsUtil.RegisterAllCommands(Assembly.GetExecutingAssembly());
 
             Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
         }
 
-        private void SendResultToDiscord(string arg1, IReadOnlyList<string> list, CommandResult result)
+        private void OnDestroy()
         {
+            _discordService.Dispose();
+        }
+
+        private void OnCommandCompleted(string command, IReadOnlyList<string> args, CommandResult result)
+        {
+            _builder.Clear();
+            _builder.AppendFormat("Command {0} {1}", command, string.Join(", ", args));
+            _builder.AppendLine();
+            _builder.Append(result.Text);
+
+            File.AppendAllText(_logsPath, _builder.ToString());
+
             if (string.IsNullOrEmpty(DiscordUrl.Value))
                 return;
 
-            var text = "";
-            File.AppendAllText(_logsPath, text);
-
-            //  TODO:   send result to discord
+            _discordService.SendResult(_builder.ToString(), result.AttachedFilePath);
         }
 
         [HarmonyPatch]
@@ -71,7 +87,6 @@ namespace ValheimRcon
                     return;
 
                 var name = ServerChatName.Value;
-                CommandsUserInfo.Name = name;
                 var playerInfo = new ZNet.PlayerInfo
                 {
                     m_name = name,
