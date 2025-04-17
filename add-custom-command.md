@@ -18,7 +18,7 @@ internal class Kick : RconCommand
 }
 ```
 3. Call the function `RconCommandsUtil.RegisterAllCommands(Assembly.GetExecutingAssembly());` in the `Awake` method of your `BaseUnityPlugin`
-```
+``` c#
 [BepInDependency(ValheimRcon.Plugin.Guid)]
 public class Plugin : BaseUnityPlugin
 {
@@ -31,7 +31,7 @@ public class Plugin : BaseUnityPlugin
 
 If everything is successful, you will see something like this in your server log at startup:
 
-```
+``` txt
 [Info   :Valheim Rcon] [14/04/2025 18:44:00] Registering rcon commands...
 [Info   :Valheim Rcon] [14/04/2025 18:44:00] Registered command addAdmin -> AddAdmin
 [Info   :Valheim Rcon] [14/04/2025 18:44:00] Registered command addPermitted -> AddPermitted
