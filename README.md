@@ -121,7 +121,7 @@ say Hello everyone!
 ```
 
 ## Custom commands
-If you are a modder and want to add your own RCON commands for your server, read [this documentation]().
+If you are a modder and want to add your own RCON commands for your server, read [this documentation](https://github.com/Tristan-dvr/ValheimRcon/blob/master/add-custom-command.md).
 
 # Contacts
 If you have any questions / bug reports / suggestions for improvement or found incompatibility with another mod, feel free to contact me in discord `typedeff` or on GitHub 
