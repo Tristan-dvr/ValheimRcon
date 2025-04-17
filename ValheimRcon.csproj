@@ -114,6 +114,11 @@
     <Compile Include="RconProxy.cs" />
     <Compile Include="ThreadingUtil.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="add-custom-command.md" />
+    <None Include="manifest.json" />
+    <None Include="README.md" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy $(TargetPath) $(SolutionDir)$(TargetFileName)</PostBuildEvent>
