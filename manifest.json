@@ -1,6 +1,6 @@
 ﻿{
   "name": "ValheimRcon",
-  "version_number": "1.0.0",
+  "version_number": "1.0.1",
   "website_url": "https://github.com/Tristan-dvr/ValheimRcon",
   "description": "Server plugin that adds support for the RCON protocol to manage your Valheim server. It includes a set of the most essential commands.",
   "dependencies": [

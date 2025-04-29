@@ -17,7 +17,7 @@ namespace ValheimRcon
     {
         public const string Guid = "org.tristan.rcon";
         public const string Name = "Valheim Rcon";
-        public const string Version = "1.0.0";
+        public const string Version = "1.0.1";
 
         public static ConfigEntry<string> DiscordUrl;
         public static ConfigEntry<string> Password;
@@ -83,7 +83,7 @@ namespace ValheimRcon
             [HarmonyPatch(typeof(ZNet), nameof(ZNet.UpdatePlayerList))]
             private static void ZNet_UpdatePlayerList(ZNet __instance)
             {
-                if (ZNet.TryGetPlayerByPlatformUserID(CommandsUserInfo.UserId, out _))
+                if (ZNet.TryGetPlayerByPlatformUserID(CommandsUserInfo.UserId, out _) || __instance.m_players.Count == 0)
                     return;
 
                 var name = ServerChatName.Value;

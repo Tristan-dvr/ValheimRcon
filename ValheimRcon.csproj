@@ -116,6 +116,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="add-custom-command.md" />
+    <None Include="CHANGELOG.md" />
     <None Include="manifest.json" />
     <None Include="README.md" />
   </ItemGroup>
