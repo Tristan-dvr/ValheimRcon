@@ -6,6 +6,9 @@ namespace ValheimRcon.Commands
     {
         public override string Command => "spawn";
 
+        public override string Description =>"Spawns a prefab at the specified position with the given level and quality. " +
+            "Usage: spawn <prefabName> <level> <count> <x> <y> <z>";
+
         protected override string OnHandle(CommandArgs args)
         {
             var prefabName = args.GetString(0);

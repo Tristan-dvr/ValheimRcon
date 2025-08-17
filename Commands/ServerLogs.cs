@@ -11,6 +11,8 @@ namespace ValheimRcon.Commands
 
         public string Command => "logs";
 
+        public string Description => "Get the server logs";
+
         public Task<CommandResult> HandleCommandAsync(CommandArgs args)
         {
             var sourcePath = Path.Combine(Paths.BepInExRootPath, "LogOutput.log");

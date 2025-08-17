@@ -4,6 +4,8 @@
     {
         public override string Command => "addPermitted";
 
+        public override string Description => "Adds a player to the permitted list. Usage: addPermitted <steamId>";
+
         protected override string OnHandle(CommandArgs args)
         {
             var steamId = args.GetString(0);

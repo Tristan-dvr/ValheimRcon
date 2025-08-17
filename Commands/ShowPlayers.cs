@@ -8,6 +8,8 @@ namespace ValheimRcon.Commands
 
         public override string Command => "players";
 
+        public override string Description => "Show all online players with their positions and zones";
+
         protected override string OnHandle(CommandArgs args)
         {
             _builder.Clear();

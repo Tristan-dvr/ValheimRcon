@@ -4,6 +4,8 @@
     {
         public override string Command => "damage";
 
+        public override string Description => "Damage a player by a specified amount. Usage: damage <steamid> <amount>";
+
         protected override string OnHandle(ZNetPeer peer, ZDO zdo, CommandArgs args)
         {
             var hitData = new HitData()

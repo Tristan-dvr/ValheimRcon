@@ -7,12 +7,15 @@ namespace ValheimRcon.Commands
     {
         public string Command { get; }
 
+        public string Description { get; }
+
         private readonly Func<CommandArgs, CommandResult> _execute;
 
-        public ActionCommand(string command, Func<CommandArgs, CommandResult> execute)
+        public ActionCommand(string command, string description, Func<CommandArgs, CommandResult> execute)
         {
             Command = command;
             _execute = execute;
+            Description = description;
         }
 
         public Task<CommandResult> HandleCommandAsync(CommandArgs args)

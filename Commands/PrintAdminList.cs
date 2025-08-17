@@ -6,6 +6,9 @@ namespace ValheimRcon.Commands
     {
         public override string Command => "adminlist";
 
+        public override string Description => "Prints the list of admins on the server.";
+
+
         private StringBuilder stringBuilder = new StringBuilder();
 
         protected override string OnHandle(CommandArgs args)

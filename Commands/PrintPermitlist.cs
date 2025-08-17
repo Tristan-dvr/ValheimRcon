@@ -8,6 +8,8 @@ namespace ValheimRcon.Commands
 
         public override string Command => "permitted";
 
+        public override string Description => "Prints the list of permitted players on the server.";
+
         protected override string OnHandle(CommandArgs args)
         {
             stringBuilder.Clear();

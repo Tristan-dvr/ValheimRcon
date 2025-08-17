@@ -4,6 +4,8 @@
     {
         public override string Command => "unban";
 
+        public override string Description => "Unban a user from the server. Usage: unban <playername or steamid>";
+
         protected override string OnHandle(CommandArgs args)
         {
             var user = args.GetString(0);

@@ -6,6 +6,8 @@ namespace ValheimRcon.Commands
     {
         public override string Command => "say";
 
+        public override string Description => "Sends a message to the chat as a shout. Usage: say <message>";
+
         protected override string OnHandle(CommandArgs args)
         {
             var text = args.ToString();

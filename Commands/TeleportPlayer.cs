@@ -6,6 +6,8 @@ namespace ValheimRcon.Commands
     {
         public override string Command => "teleport";
 
+        public override string Description => "Teleports the player to a specified position. Usage: teleport <x> <y> <z>";
+
         protected override string OnHandle(ZNetPeer peer, ZDO zdo, CommandArgs args)
         {
             var position = new Vector3();

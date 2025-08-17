@@ -7,6 +7,8 @@ namespace ValheimRcon.Commands
     {
         public override string Command => "give";
 
+        public override string Description => "Spawns an item on the player. Usage: give <steamid> <item_name> <quality> <count>";
+
         protected override string OnHandle(ZNetPeer peer, ZDO zdo, CommandArgs args)
         {
             var item = args.GetString(1);

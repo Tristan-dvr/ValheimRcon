@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using ValheimRcon.Commands;
@@ -10,7 +11,7 @@ namespace ValheimRcon
 {
     public class RconProxy : MonoBehaviour
     {
-        internal delegate void CompletedCommandDelegate(string command, IReadOnlyList<string> args, CommandResult result);
+        internal delegate void CompletedCommandDelegate(RconPeer peer, string command, IReadOnlyList<string> args, CommandResult result);
 
         private RconCommandReceiver _receiver;
 
@@ -55,18 +56,18 @@ namespace ValheimRcon
             Log.Info($"Registered command {command.Command} -> {command.GetType().Name}");
         }
 
-        public void RegisterCommand(string command, Func<CommandArgs, CommandResult> commandFunc)
+        public void RegisterCommand(string command, string description, Func<CommandArgs, CommandResult> commandFunc)
         {
-            RegisterCommand(new ActionCommand(command, commandFunc));
+            RegisterCommand(new ActionCommand(command, description, commandFunc));
         }
 
-        private async Task<string> HandleCommandAsync(string command, IReadOnlyList<string> args)
+        private async Task<string> HandleCommandAsync(RconPeer peer, string command, IReadOnlyList<string> args)
         {
             var completionSource = new TaskCompletionSource<CommandResult>();
             ThreadingUtil.RunInMainThread(() => RunCommand(command, args, completionSource));
             var result = await completionSource.Task;
-            Log.Message($"Command completed {command} - {result.Text}");
-            OnCommandCompleted?.Invoke(command, args, result);
+            Log.Message($"Command completed: {command}\n{result.Text}");
+            OnCommandCompleted?.Invoke(peer, command, args, result);
             return result.Text;
         }
 
@@ -107,6 +108,24 @@ namespace ValheimRcon
             private static void Game_Shutdown()
             {
                 Instance._receiver.Dispose();
+            }
+        }
+
+        private class ListCommand : RconCommand
+        {
+            public override string Command => "list";
+
+            public override string Description => "Prints list of available commands.";
+
+            protected override string OnHandle(CommandArgs args)
+            {
+                var stringBuilder = new StringBuilder();
+                stringBuilder.AppendLine("Available commands:");
+                foreach (var command in Instance._commands.Values)
+                {
+                    stringBuilder.AppendLine($"{command.Command} - {command.Description}");
+                }
+                return stringBuilder.ToString().Trim();
             }
         }
     }

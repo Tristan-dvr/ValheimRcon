@@ -6,6 +6,9 @@ namespace ValheimRcon.Commands
     {
         public override string Command => "ping";
 
+        public override string Description => "Sends a ping message to all players at the specified coordinates. " +
+            "Usage: ping <x> <y> <z>";
+
         protected override string OnHandle(CommandArgs args)
         {
             var position = new Vector3();

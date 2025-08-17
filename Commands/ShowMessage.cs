@@ -4,6 +4,9 @@
     {
         public override string Command => "showMessage";
 
+        public override string Description => "Displays a message in the center of the screen for all players. " +
+            "Usage: showMessage <message>";
+
         protected override string OnHandle(CommandArgs args)
         {
             var text = args.ToString();

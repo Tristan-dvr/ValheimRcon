@@ -6,6 +6,9 @@ namespace ValheimRcon.Commands
     {
         public override string Command => "banlist";
 
+        public override string Description => "Prints the list of banned players";
+
+
         private StringBuilder stringBuilder = new StringBuilder();
 
         protected override string OnHandle(CommandArgs args)

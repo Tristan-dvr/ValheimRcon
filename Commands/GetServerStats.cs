@@ -8,6 +8,8 @@ namespace ValheimRcon.Commands
     {
         public override string Command => "serverStats";
 
+        public override string Description => "Prints server statistics including player count, FPS, memory usage, and world information.";
+
         private StringBuilder builder = new StringBuilder();
 
         protected override string OnHandle(CommandArgs args)

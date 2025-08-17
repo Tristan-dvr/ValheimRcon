@@ -15,6 +15,8 @@ namespace ValheimRcon.Commands
 
         public abstract string Command { get; }
 
+        public abstract string Description { get; }
+
         public Task<CommandResult> HandleCommandAsync(CommandArgs args)
         {
             var result = OnHandle(args).Trim();
@@ -28,7 +30,7 @@ namespace ValheimRcon.Commands
 
             return Task.FromResult(new CommandResult
             {
-                Text = OnHandle(args),
+                Text = result,
                 AttachedFilePath = filePath,
             });
         }

@@ -8,100 +8,132 @@ This plugin adds RCON protocol support to your Valheim server.
 - Plugin is protected against most potential threats, preventing unauthorized access to the server via the RCON protocol
 
 # Command List
+View all available commands:
+```
+list
+```
 ### Chat
-Sends a message to the global chat
+Sends a message to the global chat:
 ```
 say {text}
 ```
-Displays a message in the center of the screen for all players
+Displays a message in the center of the screen for all players:
 ```
 showMessage {text}
 ```
-Displays a ping at the specified coordinates
+Displays a ping at the specified coordinates:
 ```
 ping {x} {y} {z}
 ```
 
 ### Player Interaction
-Deals damage to the player in the specified amount
+Deals damage to the player in the specified amount:
 ```
 damage {steam id or nickname} {damage amount}
 ```
-Heals the player by the specified amount of HP
+Heals the player by the specified amount of HP:
 ```
 heal {steam id or nickname} {heal amount}
 ```
-Creates an item at the player's coordinates with the given amount and level. *If the player is not moving, the item should be added to their inventory immediately*
+Creates an item at the player's coordinates with the given amount and level. *If the player is not moving, the item should be added to their inventory immediately*:
 ```
 give {steam id or nickname} {item} {quality} {count}
 ```
-Teleports the player to the specified coordinates
+Teleports the player to the specified coordinates:
 ```
 teleport {steam id or nickname} {x} {y} {z}
 ```
 
 ### Utility Commands
-Creates an object (any available in the game) at the specified coordinates
+Creates an object (any available in the game) at the specified coordinates:
 ```
 spawn {object name} {level} {count} {x} {y} {z}
 ```
-Adds an admin
+Adds an admin:
 ```
 addAdmin {steam id}
 ```
-Removes an admin
+Removes an admin:
 ```
 removeAdmin {steam id}
 ```
-Adds a player to the whitelist
+Adds a player to the whitelist:
 ```
 addPermitted {steam id}
 ```
-Removes a player from the whitelist
+Removes a player from the whitelist:
 ```
 removePermitted {steam id}
 ```
-Displays the list of admins
+Displays the list of admins:
 ```
 adminlist
 ```
-Displays the list of banned players
+Displays the list of banned players:
 ```
 banlist
 ```
-Displays the list of players in the whitelist
+Displays the list of players in the whitelist:
 ```
 permitted
 ```
-Disconnects a player from the server
+Disconnects a player from the server:
 ```
 kick {steam id or nickname}
 ```
-Bans a player by nickname or steam ID
+Bans a player by nickname or steam ID:
 ```
 ban {steam id or nickname}
 ```
-Bans a player by steam ID
+Bans a player by steam ID:
 ```
 banSteamId {steam id}
 ```
-Unbans a player by name or steam ID
+Unbans a player by name or steam ID:
 ```
 unban {steam id or nickname}
 ```
-Displays the list of online players
+Displays the list of online players:
 ```
 players
 ```
-Displays a set of server stats (FPS, load, etc.)
+Find a player by nickname or steam ID:
+```
+findPlayer {steam id or nickname}
+```
+Displays the current global keys:
+```
+globalKeys
+```
+Adds a global key:
+```
+addGlobalKey {key}
+```
+Removes a global key:
+```
+removeGlobalKey {key}
+```
+Displays a set of server stats (FPS, load, etc.):
 ```
 serverStats
 ```
-Shows the last few lines of the server logs. The full server log file is also sent to Discord
+Finds all object by prefab name and optionally by creator ID:
+```
+findObjects {prefab name} [creator id]
+```
+Find all objects created by a specific player:
+```
+findObjectsByCreator {creator id}
+```
+Displays the current server time:
+```
+time
+```
+Shows the last few lines of the server logs. The full server log file is also sent to Discord:
 ```
 logs
 ```
-Saves the world
+Saves the world:
 ```
 save
 ```

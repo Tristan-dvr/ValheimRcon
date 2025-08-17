@@ -82,7 +82,7 @@ namespace ValheimRcon.Core
                         string command = data[0];
                         data.RemoveAt(0);
 
-                        var response = await _commandHandler(command, data);
+                        var response = await _commandHandler(peer, command, data);
 
                         var result = new RconPacket(packet.requestId, packet.type, response);
                         Log.Debug($"Command result {command} - {result}");

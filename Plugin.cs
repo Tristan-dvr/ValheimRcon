@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 using ValheimRcon.Commands;
+using ValheimRcon.Core;
 
 namespace ValheimRcon
 {
@@ -17,14 +18,13 @@ namespace ValheimRcon
     {
         public const string Guid = "org.tristan.rcon";
         public const string Name = "Valheim Rcon";
-        public const string Version = "1.0.1";
+        public const string Version = "1.1.0";
 
         public static ConfigEntry<string> DiscordUrl;
         public static ConfigEntry<string> Password;
         public static ConfigEntry<int> Port;
         public static ConfigEntry<string> ServerChatName;
 
-        private string _logsPath;
         private DiscordService _discordService;
         private StringBuilder _builder = new StringBuilder();
 
@@ -37,7 +37,6 @@ namespace ValheimRcon
         private void Awake()
         {
             Log.CreateInstance(Logger);
-            _logsPath = Path.Combine(Paths.BepInExRootPath, "rcon_logs.log");
 
             Port = Config.Bind("1. Rcon", "Port", 2458, "Port to receive RCON commands");
             Password = Config.Bind("1. Rcon", "Password", System.Guid.NewGuid().ToString(), "Password for RCON packages validation");
@@ -49,7 +48,7 @@ namespace ValheimRcon
             _discordService = new DiscordService(DiscordUrl.Value);
 
             DontDestroyOnLoad(new GameObject(nameof(RconProxy), typeof(RconProxy)));
-            RconProxy.Instance.OnCommandCompleted += OnCommandCompleted;
+            RconProxy.Instance.OnCommandCompleted += SendResultToDiscord;
 
             RconCommandsUtil.RegisterAllCommands(Assembly.GetExecutingAssembly());
 
@@ -61,17 +60,15 @@ namespace ValheimRcon
             _discordService.Dispose();
         }
 
-        private void OnCommandCompleted(string command, IReadOnlyList<string> args, CommandResult result)
+        private void SendResultToDiscord(RconPeer peer, string command, IReadOnlyList<string> args, CommandResult result)
         {
-            _builder.Clear();
-            _builder.AppendFormat("Command {0} {1}", command, string.Join(", ", args));
-            _builder.AppendLine();
-            _builder.Append(result.Text);
-
-            File.AppendAllText(_logsPath, _builder.ToString());
-
             if (string.IsNullOrEmpty(DiscordUrl.Value))
                 return;
+
+            var fullCommand = $"{command} {string.Join(" ", args)}";
+            _builder.Clear();
+            _builder.AppendLine($"> {peer.Endpoint} -> {fullCommand}");
+            _builder.Append(result.Text);
 
             _discordService.SendResult(_builder.ToString(), result.AttachedFilePath);
         }
