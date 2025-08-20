@@ -7,6 +7,7 @@ namespace ValheimRcon.Core
 {
     internal class RconCommandReceiver : IDisposable
     {
+        private const int MaxPayloadSize = 4080;
         private static readonly Regex MatchRegex = new Regex(@"(?<=[ ][\""]|^[\""])[^\""]+(?=[\""][ ]|[\""]$)|(?<=[ ]|^)[^\"" ]+(?=[ ]|$)");
 
         private readonly AsynchronousSocketListener _socketListener;
@@ -83,6 +84,13 @@ namespace ValheimRcon.Core
                         data.RemoveAt(0);
 
                         var response = await _commandHandler(peer, command, data);
+                        var payloadSize = RconPacket.GetPayloadSize(response);
+                        if (payloadSize > MaxPayloadSize)
+                        {
+                            var newLength = response.Length / 2;
+                            response = RconCommandsUtil.TruncateMessage(response, newLength)
+                                + "\n--- message truncated ---";
+                        }
 
                         var result = new RconPacket(packet.requestId, packet.type, response);
                         Log.Debug($"Command result {command} - {result}");

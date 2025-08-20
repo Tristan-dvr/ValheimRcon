@@ -1,4 +1,5 @@
 ﻿using BepInEx;
+using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ namespace ValheimRcon.Commands
 {
     internal class ServerLogs : IRconCommand
     {
+        private const int MaxLinesToDisplay = 5;
         private readonly StringBuilder _builder = new StringBuilder();
 
         public string Command => "logs";
@@ -21,14 +23,12 @@ namespace ValheimRcon.Commands
             var targetPath = Path.Combine(Paths.CachePath, "LogOutput.log");
             File.Copy(sourcePath, targetPath, true);
             var lines = File.ReadAllLines(targetPath);
-            _builder.Clear();
-            for (int i = lines.Length - 1; i >= 0; i--)
-            {
-                _builder.Insert(0, lines[i]);
-                _builder.Insert(0, '\n');
+            var startIndex = Math.Max(lines.Length - MaxLinesToDisplay - 1, 0);
 
-                if (_builder.Length > RconCommandsUtil.MaxMessageLength)
-                    break;
+            _builder.Clear();
+            for (var i = startIndex; i < lines.Length; i++)
+            {
+                _builder.AppendLine(lines[i]);
             }
 
             return Task.FromResult(new CommandResult

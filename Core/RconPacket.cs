@@ -50,6 +50,8 @@ namespace ValheimRcon.Core
             }
         }
 
+        public static int GetPayloadSize(string payload) => Encoding.UTF8.GetByteCount(payload);
+
         public override string ToString()
         {
             return $"[{requestId} t:{type} {payload}]";

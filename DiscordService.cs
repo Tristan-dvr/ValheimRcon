@@ -38,9 +38,17 @@ namespace ValheimRcon
             try
             {
                 var filePath = message.filePath;
-                var result = string.IsNullOrEmpty(filePath)
-                    ? Discord.Send(message.text, Name, _webhook)
-                    : Discord.SendFile(message.text, Path.GetFileName(filePath), Path.GetExtension(filePath), filePath, Name, _webhook);
+                if (string.IsNullOrEmpty(filePath))
+                {
+                    Discord.Send(message.text, Name, _webhook);
+                }
+                else
+                {
+                    var fileName = Path.GetFileName(filePath);
+                    var fileExtension = Path.GetExtension(filePath);
+
+                    Discord.SendFile(message.text, fileName, fileExtension, filePath, Name, _webhook);
+                }
 
                 Log.Debug($"Sent to discord {message.text}");
             }

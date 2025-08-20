@@ -19,19 +19,9 @@ namespace ValheimRcon.Commands
 
         public Task<CommandResult> HandleCommandAsync(CommandArgs args)
         {
-            var result = OnHandle(args).Trim();
-            var filePath = string.Empty;
-            if (result.Length > RconCommandsUtil.MaxMessageLength)
-            {
-                File.WriteAllText(ResultFilePath, result);
-                filePath = ResultFilePath;
-                result = RconCommandsUtil.Truncate(result);
-            }
-
             return Task.FromResult(new CommandResult
             {
-                Text = result,
-                AttachedFilePath = filePath,
+                Text = OnHandle(args).Trim(),
             });
         }
 

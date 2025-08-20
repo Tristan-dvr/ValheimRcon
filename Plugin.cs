@@ -2,6 +2,7 @@
 using BepInEx.Configuration;
 using HarmonyLib;
 using Splatform;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -19,6 +20,9 @@ namespace ValheimRcon
         public const string Guid = "org.tristan.rcon";
         public const string Name = "Valheim Rcon";
         public const string Version = "1.1.0";
+
+        private const int MaxDiscordMessageLength = 1900;
+        private const int TruncatedMessageLength = 200;
 
         public static ConfigEntry<string> DiscordUrl;
         public static ConfigEntry<string> Password;
@@ -68,9 +72,26 @@ namespace ValheimRcon
             var fullCommand = $"{command} {string.Join(" ", args)}";
             _builder.Clear();
             _builder.AppendLine($"> {peer.Endpoint} -> {fullCommand}");
-            _builder.Append(result.Text);
 
-            _discordService.SendResult(_builder.ToString(), result.AttachedFilePath);
+            var availableMessageLength = MaxDiscordMessageLength - _builder.Length;
+
+            if (result.Text.Length > availableMessageLength)
+            {
+                var truncatedResult = RconCommandsUtil.TruncateMessage(result.Text, TruncatedMessageLength);
+                _builder.AppendLine(truncatedResult);
+                _builder.Append("*--- message truncated ---*");
+                _discordService.SendResult(_builder.ToString(), result.AttachedFilePath);
+
+                var tempFilePath = Path.Combine(Paths.CachePath, $"{DateTime.UtcNow.Ticks}.txt");
+                FileHelpers.EnsureDirectoryExists(tempFilePath);
+                File.WriteAllText(tempFilePath, result.Text);
+                _discordService.SendResult("**Full message**", tempFilePath);
+            }
+            else
+            {
+                _builder.Append(result.Text);
+                _discordService.SendResult(_builder.ToString(), result.AttachedFilePath);
+            }
         }
 
         [HarmonyPatch]
