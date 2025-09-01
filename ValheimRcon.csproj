@@ -78,6 +78,12 @@
     <Compile Include="Commands\CommandArgs.cs" />
     <Compile Include="Commands\CommandResult.cs" />
     <Compile Include="Commands\Damage.cs" />
+    <Compile Include="Commands\DeleteObjectById.cs" />
+    <Compile Include="Commands\DeleteObjectsByTag.cs" />
+    <Compile Include="Commands\FindObjectsNear.cs" />
+    <Compile Include="Commands\FindObjectsByTag.cs" />
+    <Compile Include="Commands\MoveObjectById.cs" />
+    <Compile Include="Commands\FindObjectById.cs" />
     <Compile Include="Commands\FindObjectsByCreatorCommand.cs" />
     <Compile Include="Commands\FindObjectsCommand.cs" />
     <Compile Include="Commands\FindPlayer.cs" />
@@ -101,6 +107,8 @@
     <Compile Include="Commands\ServerLogs.cs" />
     <Compile Include="Commands\ShowMessage.cs" />
     <Compile Include="Commands\ShowPlayers.cs" />
+    <Compile Include="Commands\SpawnBlock.cs" />
+    <Compile Include="Commands\SpawnObjectRotated.cs" />
     <Compile Include="Commands\SpawnObject.cs" />
     <Compile Include="Commands\TeleportPlayer.cs" />
     <Compile Include="Commands\ServerTimeCommand.cs" />

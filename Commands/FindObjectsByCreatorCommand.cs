@@ -31,7 +31,7 @@ namespace ValheimRcon.Commands
             sb.AppendLine($"Objects created by {creator}:");
             foreach (var zdo in objects)
             {
-                sb.Append($"- Prefab: {GetPrefabName(zdo.GetPrefab())}");
+                sb.Append($"- ID: ({zdo.m_uid.UserID} {zdo.m_uid.ID}), Prefab: {GetPrefabName(zdo.GetPrefab())}");
                 ZdoUtils.AppendZdoStats(zdo, sb);
                 sb.AppendLine();
             }

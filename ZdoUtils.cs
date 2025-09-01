@@ -23,7 +23,7 @@ namespace ValheimRcon
         public static void AppendZdoStats(ZDO zdo, StringBuilder stringBuilder)
         {
             stringBuilder.Append($" Position: {zdo.GetPosition()}({ZoneSystem.GetZone(zdo.GetPosition())})");
-
+            stringBuilder.Append($" Rotation: {zdo.GetRotation()}({zdo.GetRotation().eulerAngles})");
             var prefabId = zdo.GetPrefab();
             TryAppendItemDropData(zdo, stringBuilder);
             TryAppendBuildingData(zdo, stringBuilder);
