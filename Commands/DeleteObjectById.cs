@@ -25,19 +25,13 @@ namespace ValheimRcon.Commands
 
             var sb = new StringBuilder();
             sb.AppendLine($"Deleting object with m_uid {userId}:{objectId}:");
-            sb.Append($"- ID: {userId}:{objectId}, Prefab: {GetPrefabName(objects[0].GetPrefab())}");
+            sb.Append($"- ID: {userId}:{objectId}, Prefab: {ZdoUtils.GetPrefabName(objects[0].GetPrefab())}");
             ZdoUtils.AppendZdoStats(objects[0], sb);
             sb.AppendLine();
             objects[0].SetOwner(0);
             ZDOMan.instance.m_destroySendList.Add(objects[0].m_uid);
 
             return sb.ToString().Trim();
-        }
-
-        private static string GetPrefabName(int prefabId)
-        {
-            var prefab = ZNetScene.instance.GetPrefab(prefabId);
-            return prefab != null ? prefab.name : "Unknown";
         }
     }
 }

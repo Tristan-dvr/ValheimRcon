@@ -36,18 +36,12 @@ namespace ValheimRcon.Commands
             var sb = new StringBuilder();
             foreach (var zdo in objects)
             {
-                sb.Append($"- ID: ({zdo.m_uid.UserID} {zdo.m_uid.ID}), Tag: {zdo.GetString("tag")}, Prefab: {GetPrefabName(objects[0].GetPrefab())}");
+                sb.Append($"- Prefab: {ZdoUtils.GetPrefabName(objects[0].GetPrefab())}");
                 ZdoUtils.AppendZdoStats(zdo, sb);
                 sb.AppendLine();
             }
 
             return sb.ToString().Trim();
-        }
-
-        private static string GetPrefabName(int prefabId)
-        {
-            var prefab = ZNetScene.instance.GetPrefab(prefabId);
-            return prefab != null ? prefab.name : "Unknown";
         }
     }
 }

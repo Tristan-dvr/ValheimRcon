@@ -38,7 +38,6 @@ namespace ValheimRcon.Commands
             sb.AppendLine($"Found {result.Length} objects:");
             foreach (var zdo in result)
             {
-                sb.Append($"- ID: ({zdo.m_uid.UserID} {zdo.m_uid.ID}), ");
                 ZdoUtils.AppendZdoStats(zdo, sb);
                 sb.AppendLine();
             }

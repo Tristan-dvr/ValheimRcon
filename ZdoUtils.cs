@@ -22,8 +22,10 @@ namespace ValheimRcon
 
         public static void AppendZdoStats(ZDO zdo, StringBuilder stringBuilder)
         {
+            stringBuilder.Append($" Ids: {zdo.m_uid.UserID} {zdo.m_uid.ID}");
             stringBuilder.Append($" Position: {zdo.GetPosition()}({ZoneSystem.GetZone(zdo.GetPosition())})");
             stringBuilder.Append($" Rotation: {zdo.GetRotation()}({zdo.GetRotation().eulerAngles})");
+            stringBuilder.Append($" Tag: {zdo.GetString("tag")}");
             var prefabId = zdo.GetPrefab();
             TryAppendItemDropData(zdo, stringBuilder);
             TryAppendBuildingData(zdo, stringBuilder);
@@ -31,6 +33,11 @@ namespace ValheimRcon
             TryAppendGuardStoneData(zdo, stringBuilder);
         }
 
+        public static string GetPrefabName(int prefabId)
+        {
+            var prefab = ZNetScene.instance.GetPrefab(prefabId);
+            return prefab != null ? prefab.name : "Unknown";
+        }
         private static void TryAppendItemDropData(ZDO zdo, StringBuilder stringBuilder)
         {
             if (!CheckPrefabType(zdo.GetPrefab(), Type.ItemDrop))

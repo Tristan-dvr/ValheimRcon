@@ -10,10 +10,11 @@ namespace ValheimRcon.Commands
     {
         public override string Command => "moveObjectById";
 
-        public override string Description => "Move an object by its user and object ids (which together make up a ZDO.m_uid). Usage: moveObjectById <userId> <objectId> <x> <y> <x> <rx> <ry> <rz>";
+        public override string Description => "[WIP: Currently requires scene reload] Move an object by its user and object ids (which together make up a ZDO.m_uid). Usage: moveObjectById <userId> <objectId> <x> <y> <x> <rx> <ry> <rz>";
 
         protected override string OnHandle(CommandArgs args)
         {
+            // TODO: Not working client side until scene is reloaded
             var userId = args.GetLong(0);
             var objectId = args.GetLong(1);
             var objects = ZDOMan.instance.m_objectsByID.Values
@@ -40,7 +41,7 @@ namespace ValheimRcon.Commands
 
             var sb = new StringBuilder();
             sb.AppendLine($"Moving object with m_uid {userId}:{objectId}:");
-            sb.Append($"- ID: ({userId} {objectId}), Tag: {zdo.GetString("tag")}, Prefab: {GetPrefabName(zdo.GetPrefab())}");
+            sb.Append($"- Prefab: {ZdoUtils.GetPrefabName(zdo.GetPrefab())}");
             ZdoUtils.AppendZdoStats(zdo, sb);
             sb.AppendLine();
             /*
@@ -86,12 +87,6 @@ namespace ValheimRcon.Commands
             ZdoUtils.AppendZdoStats(zdo, sb);
             sb.AppendLine();
             return sb.ToString().Trim();
-        }
-
-        private static string GetPrefabName(int prefabId)
-        {
-            var prefab = ZNetScene.instance.GetPrefab(prefabId);
-            return prefab != null ? prefab.name : "Unknown";
         }
     }
 }

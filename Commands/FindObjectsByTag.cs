@@ -24,30 +24,24 @@ namespace ValheimRcon.Commands
             var sb = new StringBuilder();
             foreach (var zdo in objects)
             {
-                string prefabName = GetPrefabName(zdo.GetPrefab());
-                sb.AppendLine($"- ID: ({zdo.m_uid.UserID} {zdo.m_uid.ID}), Tag: {zdo.GetString("tag")}, Prefab: {prefabName}");
+                string prefabName = ZdoUtils.GetPrefabName(zdo.GetPrefab());
+                sb.Append($"- Prefab: {prefabName}");
                 if (prefabName.StartsWith("itemstand", StringComparison.OrdinalIgnoreCase)) {
                     string item = zdo.GetString("item");
                     if (item == "") {
-                        sb.AppendLine("  -> ItemStand is empty");
+                        sb.Append(", ItemStand Content: none");
                     }
                     else {
-                        int variant = zdo.GetInt("variant");
+                        int variant = zdo.GetInt("variant");;
                         int quality = zdo.GetInt("quality");
                         string crafterName = zdo.GetString("crafterName");
-                        sb.AppendLine($"  -> ItemStand contents: item = {item}, variant = {variant}, quality = {quality}, crafter = {crafterName}");
+                        sb.Append($", ItemStand contents: item = {item}, variant = {variant}, quality = {quality}, crafter = {crafterName}");
                     }
                 }
                 ZdoUtils.AppendZdoStats(zdo, sb);
                 sb.AppendLine();
             }
             return sb.ToString().Trim();
-        }
-
-        private static string GetPrefabName(int prefabId)
-        {
-            var prefab = ZNetScene.instance.GetPrefab(prefabId);
-            return prefab != null ? prefab.name : "Unknown";
         }
     }
 }

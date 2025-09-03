@@ -29,7 +29,6 @@ namespace ValheimRcon.Core
             disposed = true;
             try { socket?.Shutdown(SocketShutdown.Both); } catch { }
             try { socket?.Close(); } catch { }
-            socket.Close();
             socket.Dispose();
         }
     }

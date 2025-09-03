@@ -29,7 +29,7 @@ namespace ValheimRcon.Commands
             foreach (var zdo in objects)
             {
                 sb.AppendLine($"Deleting object with m_uid {zdo.m_uid.UserID} {zdo.m_uid.ID}:");
-                sb.Append($"- ID: {zdo.m_uid.UserID} {zdo.m_uid.ID}, Prefab: {GetPrefabName(zdo.GetPrefab())}");
+                sb.Append($"- Prefab: {ZdoUtils.GetPrefabName(zdo.GetPrefab())}");
                 ZdoUtils.AppendZdoStats(zdo, sb);
                 sb.AppendLine();
                 zdo.SetOwner(0);
@@ -39,10 +39,5 @@ namespace ValheimRcon.Commands
             return sb.ToString().Trim();
         }
 
-        private static string GetPrefabName(int prefabId)
-        {
-            var prefab = ZNetScene.instance.GetPrefab(prefabId);
-            return prefab != null ? prefab.name : "Unknown";
-        }
     }
 }
