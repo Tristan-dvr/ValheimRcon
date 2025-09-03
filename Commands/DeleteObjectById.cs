@@ -24,7 +24,7 @@ namespace ValheimRcon.Commands
             }
 
             var sb = new StringBuilder();
-            sb.AppendLine($" - Deleting object: {ZdoUtils.GetPrefabName(objects[0].GetPrefab())}");
+            sb.Append($" - Deleting object: {ZdoUtils.GetPrefabName(objects[0].GetPrefab())}");
             ZdoUtils.AppendZdoStats(objects[0], sb);
             ZdoUtils.deleteZDO(objects[0]);
 

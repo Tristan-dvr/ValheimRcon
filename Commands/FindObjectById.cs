@@ -25,7 +25,6 @@ namespace ValheimRcon.Commands
             var sb = new StringBuilder();
             sb.Append($"- Prefab: {ZdoUtils.GetPrefabName(objects[0].GetPrefab())}");
             ZdoUtils.AppendZdoStats(objects[0], sb);
-            sb.AppendLine();
 
             return sb.ToString().Trim();
         }

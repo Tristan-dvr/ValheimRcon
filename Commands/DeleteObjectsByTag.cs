@@ -28,12 +28,10 @@ namespace ValheimRcon.Commands
             var sb = new StringBuilder();
             foreach (var zdo in objects)
             {
-                sb.AppendLine($"Deleting object with m_uid {zdo.m_uid.UserID} {zdo.m_uid.ID}:");
-                sb.Append($"- Prefab: {ZdoUtils.GetPrefabName(zdo.GetPrefab())}");
+                sb.Append($"- Deleting Prefab: {ZdoUtils.GetPrefabName(zdo.GetPrefab())}");
                 ZdoUtils.AppendZdoStats(zdo, sb);
                 sb.AppendLine();
-                zdo.SetOwner(0);
-                ZDOMan.instance.m_destroySendList.Add(zdo.m_uid);
+                ZdoUtils.deleteZDO(zdo);
             }
 
             return sb.ToString().Trim();
