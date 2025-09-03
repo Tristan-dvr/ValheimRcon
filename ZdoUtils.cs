@@ -38,6 +38,13 @@ namespace ValheimRcon
             var prefab = ZNetScene.instance.GetPrefab(prefabId);
             return prefab != null ? prefab.name : "Unknown";
         }
+
+        public static void deleteZDO(ZDO obj)
+        {
+            obj.SetOwner(0);
+            ZDOMan.instance.m_destroySendList.Add(obj.m_uid);
+        }
+
         private static void TryAppendItemDropData(ZDO zdo, StringBuilder stringBuilder)
         {
             if (!CheckPrefabType(zdo.GetPrefab(), Type.ItemDrop))
