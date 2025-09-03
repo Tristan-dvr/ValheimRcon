@@ -24,7 +24,7 @@ namespace ValheimRcon
         {
             stringBuilder.Append($" Ids: {zdo.m_uid.UserID} {zdo.m_uid.ID}");
             stringBuilder.Append($" Position: {zdo.GetPosition()}({ZoneSystem.GetZone(zdo.GetPosition())})");
-            stringBuilder.Append($" Rotation: {zdo.GetRotation()}({zdo.GetRotation().eulerAngles})");
+            stringBuilder.Append($" Rotation: {zdo.GetRotation().eulerAngles}");
             stringBuilder.Append($" Tag: {zdo.GetString("tag")}");
             var prefabId = zdo.GetPrefab();
             TryAppendItemDropData(zdo, stringBuilder);
