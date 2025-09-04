@@ -31,6 +31,7 @@ namespace ValheimRcon
             TryAppendBuildingData(zdo, stringBuilder);
             TryAppendCharacterData(zdo, stringBuilder);
             TryAppendGuardStoneData(zdo, stringBuilder);
+            TryAppendItemContained(zdo, stringBuilder);
         }
 
         public static string GetPrefabName(int prefabId)
@@ -44,7 +45,24 @@ namespace ValheimRcon
             obj.SetOwner(0);
             ZDOMan.instance.m_destroySendList.Add(obj.m_uid);
         }
-
+        private static void TryAppendItemContained(ZDO zdo, StringBuilder stringBuilder)
+        {
+            if (ZdoUtils.GetPrefabName(zdo.GetPrefab()).StartsWith("itemstand", StringComparison.OrdinalIgnoreCase))
+            {
+                string item = zdo.GetString("item");
+                if (item == "")
+                {
+                    stringBuilder.Append(", ItemStand Content: none");
+                }
+                else
+                {
+                    int variant = zdo.GetInt("variant"); ;
+                    int quality = zdo.GetInt("quality");
+                    string crafterName = zdo.GetString("crafterName");
+                    stringBuilder.Append($", ItemStand contents: item = {item}, variant = {variant}, quality = {quality}, crafter = {crafterName}");
+                }
+            }
+        }
         private static void TryAppendItemDropData(ZDO zdo, StringBuilder stringBuilder)
         {
             if (!CheckPrefabType(zdo.GetPrefab(), Type.ItemDrop))

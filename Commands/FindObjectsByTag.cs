@@ -26,18 +26,6 @@ namespace ValheimRcon.Commands
             {
                 string prefabName = ZdoUtils.GetPrefabName(zdo.GetPrefab());
                 sb.Append($"- Prefab: {prefabName}");
-                if (prefabName.StartsWith("itemstand", StringComparison.OrdinalIgnoreCase)) {
-                    string item = zdo.GetString("item");
-                    if (item == "") {
-                        sb.Append(", ItemStand Content: none");
-                    }
-                    else {
-                        int variant = zdo.GetInt("variant");;
-                        int quality = zdo.GetInt("quality");
-                        string crafterName = zdo.GetString("crafterName");
-                        sb.Append($", ItemStand contents: item = {item}, variant = {variant}, quality = {quality}, crafter = {crafterName}");
-                    }
-                }
                 ZdoUtils.AppendZdoStats(zdo, sb);
                 sb.AppendLine();
             }
