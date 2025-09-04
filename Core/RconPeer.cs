@@ -6,7 +6,8 @@ namespace ValheimRcon.Core
     internal class RconPeer : IDisposable
     {
         internal const int BufferSize = 4096;
- 
+        private bool disposed = false;
+        public bool IsDisposed => disposed;
         internal readonly byte[] Buffer = new byte[BufferSize];
         public readonly Socket socket;
         public readonly DateTime created;
@@ -24,7 +25,10 @@ namespace ValheimRcon.Core
 
         public void Dispose()
         {
-            socket.Close();
+            if (disposed) return;
+            disposed = true;
+            try { socket?.Shutdown(SocketShutdown.Both); } catch { }
+            try { socket?.Close(); } catch { }
             socket.Dispose();
         }
     }

@@ -22,13 +22,47 @@ namespace ValheimRcon
 
         public static void AppendZdoStats(ZDO zdo, StringBuilder stringBuilder)
         {
+            stringBuilder.Append($" Ids: {zdo.m_uid.UserID} {zdo.m_uid.ID}");
             stringBuilder.Append($" Position: {zdo.GetPosition()}({ZoneSystem.GetZone(zdo.GetPosition())})");
-
+            stringBuilder.Append($" Rotation: {zdo.GetRotation().eulerAngles}");
+            stringBuilder.Append($" Tag: {zdo.GetString("tag")}");
             var prefabId = zdo.GetPrefab();
             TryAppendItemDropData(zdo, stringBuilder);
             TryAppendBuildingData(zdo, stringBuilder);
             TryAppendCharacterData(zdo, stringBuilder);
             TryAppendGuardStoneData(zdo, stringBuilder);
+            TryAppendItemContained(zdo, stringBuilder);
+        }
+
+        public static string GetPrefabName(int prefabId)
+        {
+            var prefab = ZNetScene.instance.GetPrefab(prefabId);
+            return prefab != null ? prefab.name : "Unknown";
+        }
+
+        public static void deleteZDO(ZDO obj)
+        {
+            obj.SetOwner(0);
+            ZDOMan.instance.m_destroySendList.Add(obj.m_uid);
+        }
+        private static void TryAppendItemContained(ZDO zdo, StringBuilder stringBuilder)
+        {
+            if (ZdoUtils.GetPrefabName(zdo.GetPrefab()).StartsWith("itemstand", StringComparison.OrdinalIgnoreCase))
+            {
+                string item = zdo.GetString("item");
+                stringBuilder.Append(", ItemStand contents: ");
+                if (item == "")
+                {
+                    stringBuilder.Append("none");
+                }
+                else
+                {
+                    int variant = zdo.GetInt("variant"); ;
+                    int quality = zdo.GetInt("quality");
+                    string crafterName = zdo.GetString("crafterName");
+                    stringBuilder.Append($"item = {item}, variant = {variant}, quality = {quality}, crafter = {crafterName}");
+                }
+            }
         }
 
         private static void TryAppendItemDropData(ZDO zdo, StringBuilder stringBuilder)

@@ -48,13 +48,30 @@ namespace ValheimRcon.Core
 
         public async Task SendAsync(RconPeer peer, RconPacket packet)
         {
+            if (peer.IsDisposed)
+            {
+                Log.Debug("Tried to send to a disposed peer.");
+                return;
+            }
+
+            string endpointString = "unknown";
             try
             {
                 var socket = peer.socket;
+                if (socket == null || !socket.Connected)
+                {
+                    Log.Debug("Warning: Socket is null or not connected");
+                    return;
+                }
+
                 var byteData = packet.Serialize();
                 var bytesSent = await socket.SendAsync(new ArraySegment<byte>(byteData), SocketFlags.None);
-
-                Log.Debug($"Sent {bytesSent} bytes to client [{peer.Endpoint}]");
+                endpointString = socket.RemoteEndPoint.ToString();
+                Log.Debug($"Sent {bytesSent} bytes to client [{endpointString}]");
+            }
+            catch (ObjectDisposedException)
+            {
+                Log.Debug($"Attempted to send to a disposed socket ({endpointString}).");
             }
             catch (Exception e)
             {
@@ -162,7 +179,14 @@ namespace ValheimRcon.Core
         {
             var socket = peer.socket;
             Log.Debug($"Client disconnected [{peer.Endpoint}]");
-            peer.Dispose();
+            try
+            {
+                peer.Dispose();
+            }
+            catch
+            {
+                Log.Debug("Warning: Could not dispose peer connection");
+            }
         }
 
         private static bool IsConnected(RconPeer peer)

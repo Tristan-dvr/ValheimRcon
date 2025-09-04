@@ -22,6 +22,24 @@ namespace ValheimRcon.Commands
             return value;
         }
 
+        public long GetLong(int index)
+        {
+            ValidateIndex(index);
+            if (!long.TryParse(Arguments[index], out long value))
+                throw new ArgumentException($"Argument at {index} is invalid");
+
+            return value;
+        }
+
+        public float GetFloat(int index)
+        {
+            ValidateIndex(index);
+            if (!float.TryParse(Arguments[index], out float value))
+                throw new ArgumentException($"Argument at {index} is invalid");
+
+            return value;
+        }
+
         public int TryGetInt(int index, int defaultValue = 0)
         {
             return HasArgument(index)
