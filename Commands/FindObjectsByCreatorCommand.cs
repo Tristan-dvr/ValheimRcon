@@ -31,17 +31,12 @@ namespace ValheimRcon.Commands
             sb.AppendLine($"Objects created by {creator}:");
             foreach (var zdo in objects)
             {
-                sb.Append($"- Prefab: {GetPrefabName(zdo.GetPrefab())}");
+                sb.Append($"- Prefab: {ZdoUtils.GetPrefabName(zdo.GetPrefab())}");
                 ZdoUtils.AppendZdoStats(zdo, sb);
                 sb.AppendLine();
             }
             return sb.ToString().Trim();
         }
 
-        private static string GetPrefabName(int prefabId)
-        {
-            var prefab = ZNetScene.instance.GetPrefab(prefabId);
-            return prefab != null ? prefab.name : "Unknown";
-        }
     }
 }
