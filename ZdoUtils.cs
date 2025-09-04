@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace ValheimRcon
@@ -10,28 +11,41 @@ namespace ValheimRcon
         private enum Type
         {
             None = 0,
-            ItemDrop = 1,
-            GuardStone = 2,
-            Character = 4,
-            Building = 8,
+            ItemDrop = 1 << 0,
+            GuardStone = 1 << 1,
+            Character = 1 << 2,
+            Building = 1 << 3,
+            ItemStand = 1 << 4,
+            Destructible = 1 << 5,
+            Interactable = 1 << 6,
         };
 
         private static readonly Dictionary<int, Type> PrefabTypes = new Dictionary<int, Type>();
         private static readonly Dictionary<int, float> MaxHealth = new Dictionary<int, float>();
         private static readonly Dictionary<int, float> MaxSupport = new Dictionary<int, float>();
 
+        public static string GetTag(this ZDO zdo) => zdo.GetString("tag");
+
+        public static void SetTag(this ZDO zdo, string tag) => zdo.Set("tag", tag);
+
         public static void AppendZdoStats(ZDO zdo, StringBuilder stringBuilder)
         {
-            stringBuilder.Append($" Ids: {zdo.m_uid.UserID} {zdo.m_uid.ID}");
+            stringBuilder.Append($" Id: {zdo.m_uid.ID}");
             stringBuilder.Append($" Position: {zdo.GetPosition()}({ZoneSystem.GetZone(zdo.GetPosition())})");
             stringBuilder.Append($" Rotation: {zdo.GetRotation().eulerAngles}");
-            stringBuilder.Append($" Tag: {zdo.GetString("tag")}");
+
+            var tag = zdo.GetTag();
+            if (!string.IsNullOrEmpty(tag))
+            {
+                stringBuilder.Append($" Tag: {tag}");
+            }
+
             var prefabId = zdo.GetPrefab();
             TryAppendItemDropData(zdo, stringBuilder);
             TryAppendBuildingData(zdo, stringBuilder);
             TryAppendCharacterData(zdo, stringBuilder);
             TryAppendGuardStoneData(zdo, stringBuilder);
-            TryAppendItemContained(zdo, stringBuilder);
+            TryAppendItemStandData(zdo, stringBuilder);
         }
 
         public static string GetPrefabName(int prefabId)
@@ -40,29 +54,81 @@ namespace ValheimRcon
             return prefab != null ? prefab.name : "Unknown";
         }
 
-        public static void deleteZDO(ZDO obj)
+        public static void DeleteZDO(ZDO zdo)
         {
-            obj.SetOwner(0);
-            ZDOMan.instance.m_destroySendList.Add(obj.m_uid);
-        }
-        private static void TryAppendItemContained(ZDO zdo, StringBuilder stringBuilder)
-        {
-            if (ZdoUtils.GetPrefabName(zdo.GetPrefab()).StartsWith("itemstand", StringComparison.OrdinalIgnoreCase))
+            if (!CanDeleteZdo(zdo))
             {
-                string item = zdo.GetString("item");
-                stringBuilder.Append(", ItemStand contents: ");
-                if (item == "")
-                {
-                    stringBuilder.Append("none");
-                }
-                else
-                {
-                    int variant = zdo.GetInt("variant"); ;
-                    int quality = zdo.GetInt("quality");
-                    string crafterName = zdo.GetString("crafterName");
-                    stringBuilder.Append($"item = {item}, variant = {variant}, quality = {quality}, crafter = {crafterName}");
-                }
+                return;
             }
+            zdo.SetOwner(ZDOMan.GetSessionID());
+
+            var connectionId = zdo.GetConnectionZDOID(ZDOExtraData.ConnectionType.Spawned);
+            if (connectionId != ZDOID.None 
+                && ZDOMan.instance.m_objectsByID.TryGetValue(connectionId, out var connectedZdo) 
+                && connectedZdo != zdo)
+            {
+                DeleteZDO(connectedZdo);
+            }
+
+            ZDOMan.instance.DestroyZDO(zdo);
+        }
+
+        public static bool CanDeleteZdo(ZDO zdo)
+        {
+            if (!zdo.IsValid())
+            {
+                return false;
+            }
+            if (ZNet.instance.m_peers.Any(p => p.m_characterID == zdo.m_uid)) // Player characters
+            {
+                return false;
+            }
+            var prefabName = GetPrefabName(zdo.GetPrefab());
+            if (prefabName.StartsWith("_")) // System objects
+            {
+                return false;
+            }
+            if (GetPrefabTypes(zdo.GetPrefab()) == Type.None) // Unknown objects - be conservative
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public static bool MatchesCriteria(ZDO zdo, long? creatorId, uint? id, string tag)
+        {
+            if (creatorId.HasValue && zdo.GetLong(ZDOVars.s_creator) != creatorId.Value)
+            {
+                return false;
+            }
+            if (id.HasValue && zdo.m_uid.ID != id.Value)
+            {
+                return false;
+            }
+            if (!string.IsNullOrEmpty(tag) && zdo.GetTag() != tag)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        private static void TryAppendItemStandData(ZDO zdo, StringBuilder stringBuilder)
+        {
+            if (!CheckPrefabType(zdo.GetPrefab(), Type.ItemStand))
+            {
+                return;
+            }
+            stringBuilder.Append(" ItemStand contents: ");
+            string item = zdo.GetString(ZDOVars.s_item);
+            if (string.IsNullOrEmpty(item))
+            {
+                stringBuilder.Append("none");
+                return;
+            }
+            int variant = zdo.GetInt(ZDOVars.s_variant);
+            int quality = zdo.GetInt(ZDOVars.s_quality);
+            string crafterName = zdo.GetString(ZDOVars.s_crafterName);
+            stringBuilder.Append($"item = {item}, variant = {variant}, quality = {quality}, crafter = {crafterName}");
         }
 
         private static void TryAppendItemDropData(ZDO zdo, StringBuilder stringBuilder)
@@ -87,7 +153,6 @@ namespace ValheimRcon
             {
                 stringBuilder.Append($" '{zdo.GetString($"data_{i}")}'='{zdo.GetString($"data__{i}")}'");
             }
-
         }
 
         private static void TryAppendGuardStoneData(ZDO zdo, StringBuilder stringBuilder)
@@ -140,6 +205,18 @@ namespace ValheimRcon
                 return false;
             }
 
+            var types = GetPrefabTypes(prefabId);
+
+            return (types & type) != 0;
+        }
+
+        private static Type GetPrefabTypes(int prefabId)
+        {
+            if (!ZNetScene.instance.HasPrefab(prefabId))
+            {
+                return Type.None;
+            }
+
             if (!PrefabTypes.TryGetValue(prefabId, out var types))
             {
                 var prefab = ZNetScene.instance.GetPrefab(prefabId);
@@ -161,10 +238,22 @@ namespace ValheimRcon
                 {
                     types |= Type.GuardStone;
                 }
+                if (prefab.TryGetComponent<ItemStand>(out _))
+                {
+                    types |= Type.ItemStand;
+                }
+                if (prefab.TryGetComponent<IDestructible>(out _))
+                {
+                    types |= Type.Destructible;
+                }
+                if (prefab.TryGetComponent<Interactable>(out _))
+                {
+                    types |= Type.Interactable;
+                }
                 PrefabTypes[prefabId] = types;
             }
 
-            return (types & type) != 0;
+            return types;
         }
 
         private static IEnumerable<string> GetPermittedPlayers(ZDO zdo)

@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
+﻿using System.Linq;
 using System.Text;
 using UnityEngine;
 
 namespace ValheimRcon.Commands
 {
+    [Exclude]
     internal class MoveObjectById : RconCommand
     {
         public override string Command => "moveObjectById";
@@ -15,17 +14,13 @@ namespace ValheimRcon.Commands
         protected override string OnHandle(CommandArgs args)
         {
             // TODO: Not working client side until scene is reloaded
-            var userId = args.GetLong(0);
-            var objectId = args.GetLong(1);
-            var objects = ZDOMan.instance.m_objectsByID.Values
-                .Where(obj => obj.m_uid.UserID == userId && obj.m_uid.ID == objectId)
-                .ToArray();
+            var objectId = args.GetLong(0);
+            var zdo = ZDOMan.instance.m_objectsByID.Values.FirstOrDefault(obj => obj.m_uid.ID == objectId);
 
-            if (objects.Length == 0)
+            if (zdo == null)
             {
-                return $"No objects found for m_uid {userId}:{objectId}";
+                return $"No objects found for id {objectId}";
             }
-            var zdo = objects[0];
 
             var position = new Vector3(
                 args.GetFloat(2),
@@ -40,7 +35,7 @@ namespace ValheimRcon.Commands
             );
 
             var sb = new StringBuilder();
-            sb.AppendLine($"Moving object with m_uid {userId}:{objectId}:");
+            sb.AppendLine($"Moving object:");
             sb.Append($"- Prefab: {ZdoUtils.GetPrefabName(zdo.GetPrefab())}");
             ZdoUtils.AppendZdoStats(zdo, sb);
             sb.AppendLine();

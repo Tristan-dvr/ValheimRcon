@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using ValheimRcon.Commands;
 
 namespace ValheimRcon
 {
@@ -29,7 +30,8 @@ namespace ValheimRcon
                 .Where(t => t != null)
                 .Where(t => !t.IsAbstract && t.IsClass)
                 .Where(t => t.GetConstructor(Type.EmptyTypes) != null)
-                .Where(t => t.GetInterfaces().Contains(commandInterfaceType));
+                .Where(t => t.GetInterfaces().Contains(commandInterfaceType))
+                .Where(t => t.GetCustomAttribute<ExcludeAttribute>() == null);
 
             foreach (var type in commands)
                 RconProxy.Instance.RegisterCommand(type);
