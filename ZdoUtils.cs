@@ -50,19 +50,21 @@ namespace ValheimRcon
             if (ZdoUtils.GetPrefabName(zdo.GetPrefab()).StartsWith("itemstand", StringComparison.OrdinalIgnoreCase))
             {
                 string item = zdo.GetString("item");
+                stringBuilder.Append(", ItemStand contents: ");
                 if (item == "")
                 {
-                    stringBuilder.Append(", ItemStand Content: none");
+                    stringBuilder.Append("none");
                 }
                 else
                 {
                     int variant = zdo.GetInt("variant"); ;
                     int quality = zdo.GetInt("quality");
                     string crafterName = zdo.GetString("crafterName");
-                    stringBuilder.Append($", ItemStand contents: item = {item}, variant = {variant}, quality = {quality}, crafter = {crafterName}");
+                    stringBuilder.Append($"item = {item}, variant = {variant}, quality = {quality}, crafter = {crafterName}");
                 }
             }
         }
+
         private static void TryAppendItemDropData(ZDO zdo, StringBuilder stringBuilder)
         {
             if (!CheckPrefabType(zdo.GetPrefab(), Type.ItemDrop))
