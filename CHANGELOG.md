@@ -1,3 +1,9 @@
+### 1.2.0
+- Improved command execution result delivery to RCON clients and Discord
+- Fixed errors when RCON clients disconnect (huge thanks to **ourbob** for finding and fixing the issue)
+- Added deleteObjects command for removing objects by selected criteria
+- Improved interface of some commands, added optional arguments
+
 ### 1.1.0
 - Added new commands
     - to manage global keys

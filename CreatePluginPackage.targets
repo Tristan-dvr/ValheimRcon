@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="CreatePluginPackage" AfterTargets="Build">
+    <Exec Command="powershell -Command &quot;Compress-Archive -Path '$(TargetPath)', '$(ProjectDir)README.md', '$(ProjectDir)manifest.json', '$(ProjectDir)icon.png', '$(ProjectDir)CHANGELOG.md' -DestinationPath '$(ProjectDir)$(ProjectName).zip' -Force&quot;" />
+  </Target>
+</Project>
