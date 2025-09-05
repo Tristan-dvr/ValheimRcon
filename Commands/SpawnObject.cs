@@ -21,10 +21,7 @@ namespace ValheimRcon.Commands
         {
             var prefabName = args.GetString(0);
 
-            var position = new Vector3();
-            position.x = args.GetFloat(1);
-            position.y = args.GetFloat(2);
-            position.z = args.GetFloat(3);
+            var position = args.GetVector3(1);
 
             int count = 1;
             int level = 0;
@@ -52,10 +49,8 @@ namespace ValheimRcon.Commands
                         break;
                     case "-rotation":
                     case "-rot":
-                        var rotX = args.GetFloat(index + 1);
-                        var rotY = args.GetFloat(index + 2);
-                        var rotZ = args.GetFloat(index + 3);
-                        rotation = Quaternion.Euler(rotX, rotY, rotZ);
+                        var eulerAngles = args.GetVector3(index + 1);
+                        rotation = Quaternion.Euler(eulerAngles);
                         break;
                     case "-radius":
                     case "-rad":
@@ -87,14 +82,16 @@ namespace ValheimRcon.Commands
                     character.SetLevel(level);
                 if (newPrefab.TryGetComponent<ItemDrop>(out var itemDrop))
                     itemDrop.SetQuality(level);
-                if (tamed && newPrefab.TryGetComponent<Tameable>(out var tameable))
-                    tameable.Tame(); // TODO: doesnt work yet
 
                 var zdo = newPrefab.GetComponent<ZNetView>().GetZDO();
                 createdObjects.Add(zdo);
                 if (!string.IsNullOrEmpty(tag))
                 {
                     zdo.SetTag(tag);
+                }
+                if (tamed)
+                {
+                    zdo.Set(ZDOVars.s_tamed, true);
                 }
 
                 ZNetView.FinishGhostInit();

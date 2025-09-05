@@ -10,10 +10,7 @@ namespace ValheimRcon.Commands
 
         protected override string OnHandle(ZNetPeer peer, ZDO zdo, CommandArgs args)
         {
-            var position = new Vector3();
-            position.x = args.GetInt(1);
-            position.y = args.GetInt(2);
-            position.z = args.GetInt(3);
+            var position = args.GetVector3(1);
 
             peer.InvokeRoutedRpcToZdo("RPC_TeleportTo", position, Quaternion.identity, true);
             return $"Player {peer.GetPlayerInfo()} teleported to {position}";

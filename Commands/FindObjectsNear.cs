@@ -12,19 +12,16 @@ namespace ValheimRcon.Commands
             "Usage (with optional arguments): findObjectsNear <x> <z> <y> <radius> " +
             "-prefab <prefab> " +
             "-creator <creator id> " +
-            "-id <id> " +
+            "-id <id> <userid> " +
             "-tag <tag>";
 
         protected override string OnHandle(CommandArgs args)
         {
-            var position = new Vector3();
-            position.x = args.GetFloat(0);
-            position.y = args.GetFloat(1);
-            position.z = args.GetFloat(2);
+            var position = args.GetVector3(0);
             var radius = args.GetFloat(3);
 
             long? creatorId = null;
-            uint? id = null;
+            ObjectId? id = null;
             string tag = string.Empty;
 
             var optionalArgs = args.GetOptionalArguments();
@@ -37,7 +34,7 @@ namespace ValheimRcon.Commands
                         creatorId = args.GetLong(index + 1);
                         break;
                     case "-id":
-                        id = args.GetUInt(index + 1);
+                        id = args.GetObjectId(index + 1);
                         break;
                     case "-tag":
                         tag = args.GetString(index + 1);

@@ -11,7 +11,7 @@ namespace ValheimRcon.Commands
             "Usage (with optional arguments): findObjects " +
             "-prefab <prefab> " +
             "-creator <creator id> " +
-            "-id <id> " +
+            "-id <id> <userid> " +
             "-tag <tag>";
 
         protected override string OnHandle(CommandArgs args)
@@ -25,7 +25,7 @@ namespace ValheimRcon.Commands
 
             var prefab = string.Empty;
             long? creatorId = null;
-            uint? id = null;
+            ObjectId? id = null;
             var tag = string.Empty;
 
             foreach (var index in optionalArgs)
@@ -40,7 +40,7 @@ namespace ValheimRcon.Commands
                         creatorId = args.GetLong(index + 1);
                         break;
                     case "-id":
-                        id = args.GetUInt(index + 1);
+                        id = args.GetObjectId(index + 1);
                         break;
                     case "-tag":
                         tag = args.GetString(index + 1);
@@ -52,7 +52,15 @@ namespace ValheimRcon.Commands
             var prefabHash = prefab.GetStableHashCode();
 
             var objects = ZDOMan.instance.m_objectsByID.Values
-                .Where(zdo => ZdoUtils.MatchesCriteria(zdo, creatorId, id, tag))
+                .Where(zdo =>
+                {
+                    if (!string.IsNullOrEmpty(prefab) && zdo.GetPrefab() != prefabHash)
+                    {
+                        return false;
+                    }
+
+                    return ZdoUtils.MatchesCriteria(zdo, creatorId, id, tag);
+                })
                 .ToArray();
 
             if (objects.Length == 0)

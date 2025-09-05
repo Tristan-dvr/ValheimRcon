@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ValheimRcon.Commands;
 
 namespace ValheimRcon
 {
@@ -30,7 +31,7 @@ namespace ValheimRcon
 
         public static void AppendZdoStats(ZDO zdo, StringBuilder stringBuilder)
         {
-            stringBuilder.Append($" Id: {zdo.m_uid.ID}");
+            stringBuilder.Append($" Id: {zdo.m_uid.ID} UserId: {zdo.m_uid.UserID}");
             stringBuilder.Append($" Position: {zdo.GetPosition()}({ZoneSystem.GetZone(zdo.GetPosition())})");
             stringBuilder.Append($" Rotation: {zdo.GetRotation().eulerAngles}");
 
@@ -95,13 +96,13 @@ namespace ValheimRcon
             return true;
         }
 
-        public static bool MatchesCriteria(ZDO zdo, long? creatorId, uint? id, string tag)
+        public static bool MatchesCriteria(ZDO zdo, long? creatorId, ObjectId? id, string tag)
         {
             if (creatorId.HasValue && zdo.GetLong(ZDOVars.s_creator) != creatorId.Value)
             {
                 return false;
             }
-            if (id.HasValue && zdo.m_uid.ID != id.Value)
+            if (id.HasValue && (zdo.m_uid.ID != id.Value.Id || zdo.m_uid.UserID != id.Value.UserId))
             {
                 return false;
             }
@@ -118,17 +119,26 @@ namespace ValheimRcon
             {
                 return;
             }
-            stringBuilder.Append(" ItemStand contents: ");
             string item = zdo.GetString(ZDOVars.s_item);
             if (string.IsNullOrEmpty(item))
             {
-                stringBuilder.Append("none");
                 return;
             }
-            int variant = zdo.GetInt(ZDOVars.s_variant);
-            int quality = zdo.GetInt(ZDOVars.s_quality);
-            string crafterName = zdo.GetString(ZDOVars.s_crafterName);
-            stringBuilder.Append($"item = {item}, variant = {variant}, quality = {quality}, crafter = {crafterName}");
+            stringBuilder.Append($" Attached item: {item}");
+            stringBuilder.Append($" Durability: {zdo.GetFloat(ZDOVars.s_durability)}");
+            stringBuilder.Append($" Stack: {zdo.GetInt(ZDOVars.s_stack)}");
+            stringBuilder.Append($" Quality: {zdo.GetInt(ZDOVars.s_quality)}");
+            stringBuilder.Append($" Variant: {zdo.GetInt(ZDOVars.s_variant)}");
+            stringBuilder.Append($" Crafter: {zdo.GetString(ZDOVars.s_crafterName)} ({zdo.GetLong(ZDOVars.s_crafterID)})");
+            int dataCount = zdo.GetInt(ZDOVars.s_dataCount);
+            if (dataCount > 0)
+            {
+                stringBuilder.Append($" Data:");
+            }
+            for (int i = 0; i < dataCount; i++)
+            {
+                stringBuilder.Append($" '{zdo.GetString($"data_{i}")}'='{zdo.GetString($"data__{i}")}'");
+            }
         }
 
         private static void TryAppendItemDropData(ZDO zdo, StringBuilder stringBuilder)

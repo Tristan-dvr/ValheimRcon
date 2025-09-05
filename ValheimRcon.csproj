@@ -76,6 +76,7 @@
     <Compile Include="Commands\Ban.cs" />
     <Compile Include="Commands\BanSteamId.cs" />
     <Compile Include="Commands\CommandArgs.cs" />
+    <Compile Include="Commands\CommandArgsExtensions.cs" />
     <Compile Include="Commands\CommandResult.cs" />
     <Compile Include="Commands\Damage.cs" />
     <Compile Include="Commands\DeleteObjects.cs" />
@@ -90,6 +91,7 @@
     <Compile Include="Commands\InvokeConsoleCommand.cs" />
     <Compile Include="Commands\IRconCommand.cs" />
     <Compile Include="Commands\Kick.cs" />
+    <Compile Include="Commands\ObjectId.cs" />
     <Compile Include="Commands\PlayerRconCommand.cs" />
     <Compile Include="Commands\PrintAdminList.cs" />
     <Compile Include="Commands\PrintBanlist.cs" />
@@ -130,6 +132,7 @@
     <None Include="add-custom-command.md" />
     <None Include="CHANGELOG.md" />
     <None Include="manifest.json" />
+    <None Include="commands.md" />
     <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -10,7 +10,7 @@ namespace ValheimRcon.Commands
         public override string Description => "Delete objects matching all search criteria. " +
             "Usage (with optional arguments): deleteObjects " +
             "-creator <creator id> " +
-            "-id <object id> " +
+            "-id <id> <userid> " +
             "-tag <tag>";
 
         protected override string OnHandle(CommandArgs args)
@@ -23,7 +23,7 @@ namespace ValheimRcon.Commands
             }
 
             long? creatorId = null;
-            uint? id = null;
+            ObjectId? id = null;
             var tag = string.Empty;
 
             foreach (var index in optionalArgs)
@@ -35,7 +35,7 @@ namespace ValheimRcon.Commands
                         creatorId = args.GetLong(index + 1);
                         break;
                     case "-id":
-                        id = args.GetUInt(index + 1);
+                        id = args.GetObjectId(index + 1);
                         break;
                     case "-tag":
                         tag = args.GetString(index + 1);
