@@ -5,10 +5,10 @@ using System.Text.RegularExpressions;
 
 namespace ValheimRcon.Core
 {
-    internal class RconCommandReceiver : IDisposable
+    public class RconCommandReceiver : IDisposable
     {
         private const int MaxPayloadSize = 4080;
-        private static readonly Regex MatchRegex = new Regex(@"(?<=[ ][\""]|^[\""])[^\""]+(?=[\""][ ]|[\""]$)|(?<=[ ]|^)[^\"" ]+(?=[ ]|$)");
+        private static readonly Regex MatchRegex = new Regex(@"(?<=[ ][\""]|^[\""])[^\""]+(?=[\""][ ]|[\""]$)|(?<=[ ]|^)[^\"" ]+(?=[ ]|$)", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         private readonly AsynchronousSocketListener _socketListener;
         private readonly string _password;
@@ -16,6 +16,12 @@ namespace ValheimRcon.Core
 
         public RconCommandReceiver(int port, string password, RconCommandHandler commandHandler)
         {
+            if (string.IsNullOrEmpty(password))
+                throw new ArgumentException("Password cannot be null or empty", nameof(password));
+            
+            if (commandHandler == null)
+                throw new ArgumentNullException(nameof(commandHandler));
+            
             _password = password;
             _socketListener = new AsynchronousSocketListener(IPAddress.Any, port);
             _socketListener.OnMessage += SocketListener_OnMessage;
@@ -45,7 +51,7 @@ namespace ValheimRcon.Core
                         }
 
                         RconPacket result;
-                        var success = string.Equals(packet.payload.Trim(), _password);
+                        var success = string.Equals(packet.payload?.Trim() ?? string.Empty, _password);
                         if (success)
                         {
                             peer.SetAuthentificated(true);
@@ -74,12 +80,20 @@ namespace ValheimRcon.Core
                         }
 
                         // strip slash if present
-                        var payload = packet.payload.TrimStart('/');
+                        var payload = packet.payload?.TrimStart('/') ?? string.Empty;
 
                         var data = MatchRegex.Matches(payload)
                             .Cast<Match>()
                             .Select(m => m.Value)
                             .ToList();
+                        
+                        if (data.Count == 0)
+                        {
+                            Log.Warning($"Empty command from [{peer.Endpoint}]");
+                            await _socketListener.SendAsync(peer, new RconPacket(packet.requestId, packet.type, "Empty command"));
+                            break;
+                        }
+                        
                         string command = data[0];
                         data.RemoveAt(0);
 

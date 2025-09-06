@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace ValheimRcon.Core
 {
-    internal class AsynchronousSocketListener
+    public class AsynchronousSocketListener
     {
         private static readonly TimeSpan UnauthorizedClientLifetime = TimeSpan.FromSeconds(30);
 
@@ -19,10 +20,19 @@ namespace ValheimRcon.Core
         private readonly Socket _listener;
         private readonly HashSet<RconPeer> _clients = new HashSet<RconPeer>();
         private readonly HashSet<RconPeer> _waitingForDisconnect = new HashSet<RconPeer>();
+        private readonly List<RconPeer> _clientsSnapshot = new List<RconPeer>();
+        private readonly object _clientsLock = new object();
+        private readonly object _disconnectLock = new object();
         private IDisposable _acceptThread;
 
         public AsynchronousSocketListener(IPAddress ipAddress, int port)
         {
+            if (ipAddress == null)
+                throw new ArgumentNullException(nameof(ipAddress));
+            
+            if (port < 1 || port > 65535)
+                throw new ArgumentOutOfRangeException(nameof(port), "Port must be between 1 and 65535");
+            
             _address = ipAddress;
             _port = port;
             _listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -81,7 +91,15 @@ namespace ValheimRcon.Core
 
         public void Update()
         {
-            foreach (var client in _clients)
+            // Create snapshot of clients for processing
+            lock (_clientsLock)
+            {
+                _clientsSnapshot.Clear();
+                _clientsSnapshot.AddRange(_clients);
+            }
+
+            // Process clients without holding the lock
+            foreach (var client in _clientsSnapshot)
             {
                 if (!IsConnected(client))
                 {
@@ -98,27 +116,45 @@ namespace ValheimRcon.Core
                 }
             }
 
-            foreach (var client in _waitingForDisconnect)
+            // Process disconnections
+            lock (_disconnectLock)
             {
-                _clients.Remove(client);
-                DisconnectPeer(client);
+                foreach (var client in _waitingForDisconnect)
+                {
+                    lock (_clientsLock)
+                    {
+                        _clients.Remove(client);
+                    }
+                    DisconnectPeer(client);
+                }
+                _waitingForDisconnect.Clear();
             }
-            _waitingForDisconnect.Clear();
         }
 
         public void Close()
         {
             _listener.Close();
             _acceptThread?.Dispose();
-            foreach (var client in _clients)
-                client.Dispose();
-            _waitingForDisconnect.Clear();
-            _clients.Clear();
+            
+            lock (_clientsLock)
+            {
+                foreach (var client in _clients)
+                    client.Dispose();
+                _clients.Clear();
+            }
+            
+            lock (_disconnectLock)
+            {
+                _waitingForDisconnect.Clear();
+            }
         }
 
         public void Disconnect(RconPeer peer)
         {
-            _waitingForDisconnect.Add(peer);
+            lock (_disconnectLock)
+            {
+                _waitingForDisconnect.Add(peer);
+            }
         }
 
         private void TryAcceptClientThread()
@@ -147,6 +183,14 @@ namespace ValheimRcon.Core
                 if (readCount == 0)
                     return;
 
+                // Validate read count to prevent buffer overflow
+                if (readCount > peer.Buffer.Length)
+                {
+                    Log.Warning($"Received more data than buffer size: {readCount} > {peer.Buffer.Length} [{peer.Endpoint}]");
+                    Disconnect(peer);
+                    return;
+                }
+
                 OnPackageReceived(peer, readCount);
             }
         }
@@ -159,7 +203,13 @@ namespace ValheimRcon.Core
             Log.Debug($"Client connected [{state.Endpoint}]");
 
             //  Work with collection in main thread only
-            ThreadingUtil.RunInMainThread(() => _clients.Add(state));
+            ThreadingUtil.RunInMainThread(() => 
+            {
+                lock (_clientsLock)
+                {
+                    _clients.Add(state);
+                }
+            });
         }
 
         private void OnPackageReceived(RconPeer peer, int readCount)
@@ -167,12 +217,21 @@ namespace ValheimRcon.Core
             var socket = peer.socket;
             Log.Debug($"Got package from client, {readCount} bytes [{peer.Endpoint}]");
 
-            var package = new RconPacket(peer.Buffer);
-
-            Log.Debug($"Received package {package}");
-            OnMessage?.Invoke(peer, package);
-
-            Array.Clear(peer.Buffer, 0, peer.Buffer.Length);
+            try
+            {
+                var package = new RconPacket(peer.Buffer);
+                Log.Debug($"Received package {package}");
+                OnMessage?.Invoke(peer, package);
+            }
+            catch (Exception e)
+            {
+                Log.Warning($"Failed to parse packet from [{peer.Endpoint}]: {e.Message}");
+                Disconnect(peer);
+            }
+            finally
+            {
+                Array.Clear(peer.Buffer, 0, peer.Buffer.Length);
+            }
         }
 
         private void DisconnectPeer(RconPeer peer)
