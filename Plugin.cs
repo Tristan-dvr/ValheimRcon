@@ -73,6 +73,14 @@ namespace ValheimRcon
             _builder.Clear();
             _builder.AppendLine($"> {peer.Endpoint} -> {fullCommand}");
 
+            if (_builder.Length > MaxDiscordMessageLength)
+            {
+                var text = RconCommandsUtil.TruncateMessage(_builder.ToString(), 200);
+                _builder.Clear();
+                _builder.Append(text);
+                _builder.AppendLine("...");
+            }
+
             var availableMessageLength = MaxDiscordMessageLength - _builder.Length;
 
             if (result.Text.Length > availableMessageLength)
