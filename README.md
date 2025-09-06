@@ -43,7 +43,7 @@ give Ragnar SwordBlackmetal 4 1
 ```
 Spawns 4 tamed level 3 **Boars** at coordinates x:90 y:31 z:90:
 ```
-spawn Boar 90 31 90 -count 3 -level 4 -tamed
+spawn Boar 90 31 90 -count 4 -level 3 -tamed
 ```
 Sends a message `Hello everyone!` to the global chat:
 ```
