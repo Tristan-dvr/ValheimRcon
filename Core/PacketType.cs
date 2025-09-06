@@ -1,6 +1,6 @@
 ﻿namespace ValheimRcon.Core
 {
-    internal enum PacketType : int
+    public enum PacketType : int
     {
         Error = 0,
         Command = 2,

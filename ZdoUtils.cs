@@ -6,7 +6,7 @@ using ValheimRcon.Commands;
 
 namespace ValheimRcon
 {
-    internal static class ZdoUtils
+    public static class ZdoUtils
     {
         [Flags]
         private enum Type
