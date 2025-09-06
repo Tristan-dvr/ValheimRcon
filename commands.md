@@ -21,6 +21,14 @@ Bans a player by their Steam ID
 banSteamId 76561198000000000
 ```
 
+### ban
+Bans a player by their name or Steam ID  
+**Usage:** `ban <playername or steamid>`  
+```
+ban PlayerName
+ban 76561198000000000
+```
+
 ### unban
 Unbans a player from the server  
 **Usage:** `unban <playername or steamid>`  
@@ -224,18 +232,6 @@ Gets server logs (last 5 lines)
 ### consoleCommand
 Executes a console command on the server  
 **Usage:** `consoleCommand <command>`  
-
-### adminlist
-Shows the list of server administrators  
-**Usage:** `adminlist`
-
-### banlist
-Shows the list of banned players  
-**Usage:** `banlist`
-
-### permitted
-Shows the list of permitted players  
-**Usage:** `permitted`
 
 ---
 
