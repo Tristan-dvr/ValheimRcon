@@ -178,18 +178,20 @@ namespace ValheimRcon.Core
             var socket = peer.socket;
             if (socket.Poll(0, SelectMode.SelectRead) && socket.Available > 0)
             {
-                var readCount = socket.Receive(peer.Buffer);
-
-                if (readCount == 0)
-                    return;
-
-                // Validate read count to prevent buffer overflow
-                if (readCount > peer.Buffer.Length)
+                // Check available data before reading to prevent buffer overflow
+                var availableBytes = socket.Available;
+                if (availableBytes > peer.Buffer.Length)
                 {
-                    Log.Warning($"Received more data than buffer size: {readCount} > {peer.Buffer.Length} [{peer.Endpoint}]");
+                    Log.Warning($"Available data exceeds buffer size: {availableBytes} > {peer.Buffer.Length} [{peer.Endpoint}]");
                     Disconnect(peer);
                     return;
                 }
+
+                // Use Receive with explicit buffer size to prevent overflow
+                var readCount = socket.Receive(peer.Buffer, 0, Math.Min(availableBytes, peer.Buffer.Length), SocketFlags.None);
+
+                if (readCount == 0)
+                    return;
 
                 OnPackageReceived(peer, readCount);
             }
