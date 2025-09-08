@@ -315,7 +315,8 @@ namespace ValheimRcon.Tests.Core
         #region ToString Tests
 
         [TestCase(1, PacketType.Command, "test", "[1 t:Command test]")]
-        [TestCase(123, PacketType.Login, "password", "[123 t:Login password]")]
+        [TestCase(123, PacketType.Login, "password", "[123 t:Login ****]")] // Password should be masked
+        [TestCase(123, PacketType.Login, "password123123", "[123 t:Login ****]")] // Password should be masked
         [TestCase(0, PacketType.Error, "", "[0 t:Error ]")]
         [TestCase(-1, PacketType.Command, "error", "[-1 t:Command error]")]
         public void ToString_WithVariousPackets_ShouldReturnCorrectFormat(int requestId, PacketType type, string payload, string expected)

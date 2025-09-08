@@ -113,7 +113,14 @@ namespace ValheimRcon.Core
 
         public override string ToString()
         {
-            return $"[{requestId} t:{type} {payload}]";
+            if (type == PacketType.Login)
+            {
+                return $"[{requestId} t:{type} ****]";
+            }
+            else
+            {
+                return $"[{requestId} t:{type} {payload}]";
+            }
         }
     }
 }
