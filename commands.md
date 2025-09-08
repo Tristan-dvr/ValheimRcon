@@ -82,9 +82,21 @@ Shows the list of permitted players
 
 ### give
 Gives an item to a player  
-**Usage:** `give <steamid> <item_name> <quality> <count>`  
+**Usage:** `give <steamid> <item_name> [options]`
+
+**Options:**
+- `-count <count>` - number of items to give (default: 1)
+- `-quality <quality>` - item quality level (default: 1)
+- `-variant <variant>` - item variant (default: 0)
+- `-data <key> <value>` - custom data for the item
+- `-nocrafter` - removes crafter information from the item
+
 ```
-give 76561198000000000 SwordBlackmetal 4 1
+give 76561198000000000 SwordBlackmetal
+give 76561198000000000 SwordBlackmetal -count 5 -quality 4
+give 76561198000000000 ArrowWood -count 100 -variant 1
+give 76561198000000000 OnionSoup -count 10 -data org.bepinex.plugins.cooking#Cooking.Cooking+CookingSkill 099 // gives 10 Onion Soups with 99 Cooking Skill
+give 76561198000000000 SwordIron -nocrafter // gives item without crafter information
 ```
 
 ### heal
