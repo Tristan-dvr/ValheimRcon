@@ -1,3 +1,6 @@
+### 1.2.1
+- Improved give command
+
 ### 1.2.0
 - Improved command execution result delivery to RCON clients and Discord
 - Fixed errors when RCON clients disconnect (huge thanks to **ourbob** for finding and fixing the issue)
