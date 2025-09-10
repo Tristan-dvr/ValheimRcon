@@ -1,0 +1,186 @@
+name: Build and Publish
+
+on:
+  push:
+    branches:
+      - published
+  workflow_dispatch:
+    inputs:
+      test_build_only:
+        description: 'Run only build job for testing'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  build:
+    runs-on: windows-latest
+    outputs:
+      zip-name: ${{ steps.create-package.outputs.zip-name }}
+      package-name: ${{ steps.extract-manifest.outputs.package-name }}
+      package-description: ${{ steps.extract-manifest.outputs.package-description }}
+      package-website: ${{ steps.extract-manifest.outputs.package-website }}
+      package-version: ${{ steps.extract-project-info.outputs.version }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        lfs: true
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Find solution file
+      id: find-solution
+      run: |
+        $solutionFile = Get-ChildItem -Path . -Filter "*.sln" | Select-Object -First 1
+        if ($solutionFile) {
+          echo "solution-path=$($solutionFile.Name)" >> $env:GITHUB_OUTPUT
+          echo "Found solution file: $($solutionFile.Name)"
+        } else {
+          echo "No solution file found!"
+          exit 1
+        }
+
+    - name: Extract project info
+      id: extract-project-info
+      run: |
+        # Extract version from Plugin.cs
+        $pluginFile = Get-Content "Plugin.cs" -Raw
+        $versionMatch = [regex]::Match($pluginFile, 'public const string Version = "([^"]+)"')
+        if ($versionMatch.Success) {
+          $version = $versionMatch.Groups[1].Value
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+          echo "=== PLUGIN VERSION ==="
+          echo "Extracted version from Plugin.cs: $version"
+          echo "====================="
+        } else {
+          echo "Could not extract version from Plugin.cs!"
+          exit 1
+        }
+        
+        # Extract assembly name from .csproj
+        $csprojFile = Get-ChildItem -Path . -Filter "*.csproj" | Select-Object -First 1
+        if ($csprojFile) {
+          $csprojContent = Get-Content $csprojFile.FullName -Raw
+          $assemblyMatch = [regex]::Match($csprojContent, '<AssemblyName>([^<]+)</AssemblyName>')
+          if ($assemblyMatch.Success) {
+            $assemblyName = $assemblyMatch.Groups[1].Value
+            echo "assembly-name=$assemblyName" >> $env:GITHUB_OUTPUT
+            echo "=== ASSEMBLY NAME ==="
+            echo "Extracted assembly name from $($csprojFile.Name): $assemblyName"
+            echo "===================="
+          } else {
+            echo "Could not extract assembly name from $($csprojFile.Name)!"
+            exit 1
+          }
+        } else {
+          echo "No .csproj file found!"
+          exit 1
+        }
+
+    - name: Restore dependencies
+      run: dotnet restore ${{ steps.find-solution.outputs.solution-path }}
+
+    - name: Build solution
+      run: dotnet build ${{ steps.find-solution.outputs.solution-path }} --configuration Release --no-restore
+
+    - name: Update manifest.json version
+      run: |
+        $version = "${{ steps.extract-project-info.outputs.version }}"
+        $manifest = Get-Content "manifest.json" | ConvertFrom-Json
+        $manifest.version_number = $version
+        $manifest | ConvertTo-Json -Depth 10 | Set-Content "manifest.json"
+        echo "Updated manifest.json version to: $version"
+
+    - name: Create release package
+      id: create-package
+      run: |
+        $version = "${{ steps.extract-project-info.outputs.version }}"
+        $assemblyName = "${{ steps.extract-project-info.outputs.assembly-name }}"
+        $manifest = Get-Content "manifest.json" | ConvertFrom-Json
+        $packageName = $manifest.name
+        $zipName = "$packageName-v$version.zip"
+        
+        # Create temporary directory for package
+        New-Item -ItemType Directory -Path "package" -Force
+        
+        # Copy DLL from known location
+        $dllPath = "bin\Release\$assemblyName.dll"
+        if (Test-Path $dllPath) {
+          Copy-Item $dllPath "package\$assemblyName.dll"
+          echo "Copied DLL: $assemblyName.dll"
+        } else {
+          echo "DLL not found at: $dllPath"
+          exit 1
+        }
+        
+        # Copy other required files
+        Copy-Item "manifest.json" "package\"
+        Copy-Item "icon.png" "package\"
+        Copy-Item "README.md" "package\"
+        Copy-Item "CHANGELOG.md" "package\"
+        
+        # Create zip archive
+        Compress-Archive -Path "package\*" -DestinationPath $zipName -Force
+        
+        echo "Created package: $zipName"
+        echo "zip-name=$zipName" >> $env:GITHUB_OUTPUT
+
+    - name: Extract package info from manifest
+      id: extract-manifest
+      run: |
+        $manifest = Get-Content "manifest.json" | ConvertFrom-Json
+        
+        # Log all manifest data
+        echo "=== MANIFEST DATA ==="
+        echo "Name: $($manifest.name)"
+        echo "Version: $($manifest.version_number)"
+        echo "Description: $($manifest.description)"
+        echo "Website URL: $($manifest.website_url)"
+        echo "Dependencies: $($manifest.dependencies -join ', ')"
+        echo "===================="
+        
+        # Set outputs
+        echo "package-name=$($manifest.name)" >> $env:GITHUB_OUTPUT
+        echo "package-description=$($manifest.description)" >> $env:GITHUB_OUTPUT
+        echo "package-website=$($manifest.website_url)" >> $env:GITHUB_OUTPUT
+        echo "package-dependencies=$($manifest.dependencies -join ' ')" >> $env:GITHUB_OUTPUT
+        
+        echo "Extracted package info: $($manifest.name) - $($manifest.description)"
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-package
+        path: ${{ steps.create-package.outputs.zip-name }}
+        retention-days: 1
+        if-no-files-found: error
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ !inputs.test_build_only }}
+
+    steps:
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: release-package
+        path: .
+
+    - name: Publish to Thunderstore
+      uses: GreenTF/upload-thunderstore-package@v4.3
+      with:
+        token: ${{ secrets.TS_TOKEN }}
+        community: valheim
+        namespace: Tristan
+        name: ${{ needs.build.outputs.package-name }}
+        description: ${{ needs.build.outputs.package-description }}
+        version: ${{ needs.build.outputs.package-version }}
+        file: ${{ needs.build.outputs.zip-name }}
+        website: ${{ needs.build.outputs.package-website }}
+        repo: thunderstore.io
