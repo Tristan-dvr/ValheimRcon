@@ -39,7 +39,7 @@ For example if you execute findObjects command, it could return a lot of objects
 ### Examples
 Gives player **Ragnar** level 4 Blackmetal Sword:
 ```
-give Ragnar SwordBlackmetal 4 1
+give Ragnar SwordBlackmetal -quality 4
 ```
 Spawns 4 tamed level 3 **Boars** at coordinates x:90 y:31 z:90:
 ```

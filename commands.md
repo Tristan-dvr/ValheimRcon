@@ -153,7 +153,7 @@ spawn Rock 100 50 200 -count 5 -radius 10
 ```
 
 ### findObjects
-Finds objects matching all search criteria  
+Finds objects matching the provided search criteria (at least one criteria must be provided)  
 **Usage:** `findObjects [options]`
 
 **Options:**
@@ -183,7 +183,7 @@ findObjectsNear 100 50 200 50 -prefab Boar
 ```
 
 ### deleteObjects
-Deletes objects matching all search criteria  
+Deletes objects matching the provided search criteria (at least one criteria must be provided)  
 **Usage:** `deleteObjects [options]`
 
 **Options:**

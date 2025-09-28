@@ -9,7 +9,7 @@ namespace ValheimRcon.Commands
         public override string Command => "findObjectsNear";
 
         public override string Description => "Find objects near a location. " +
-            "Usage (with optional arguments): findObjectsNear <x> <z> <y> <radius> " +
+            "Usage (with optional arguments): findObjectsNear <x> <y> <z> <radius> " +
             "-prefab <prefab> " +
             "-creator <creator id> " +
             "-id <id> <userid> " +
