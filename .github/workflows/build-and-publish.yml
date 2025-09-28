@@ -33,15 +33,15 @@ jobs:
       with:
         dotnet-version: '9.0.x'
 
-    - name: Find solution file
-      id: find-solution
+    - name: Find project file
+      id: find-project
       run: |
-        $solutionFile = Get-ChildItem -Path . -Filter "*.sln" | Select-Object -First 1
-        if ($solutionFile) {
-          echo "solution-path=$($solutionFile.Name)" >> $env:GITHUB_OUTPUT
-          echo "Found solution file: $($solutionFile.Name)"
+        $projectFile = Get-ChildItem -Path . -Filter "*.csproj" | Where-Object { $_.Name -notlike "*Test*" -and $_.Name -notlike "*Tests*" } | Select-Object -First 1
+        if ($projectFile) {
+          echo "project-path=$($projectFile.Name)" >> $env:GITHUB_OUTPUT
+          echo "Found project file: $($projectFile.Name)"
         } else {
-          echo "No solution file found!"
+          echo "No suitable project file found!"
           exit 1
         }
 
@@ -83,10 +83,10 @@ jobs:
         }
 
     - name: Restore dependencies
-      run: dotnet restore ${{ steps.find-solution.outputs.solution-path }}
+      run: dotnet restore ${{ steps.find-project.outputs.project-path }}
 
-    - name: Build solution
-      run: dotnet build ${{ steps.find-solution.outputs.solution-path }} --configuration Release --no-restore
+    - name: Build project
+      run: dotnet build ${{ steps.find-project.outputs.project-path }} --configuration Release --no-restore
 
     - name: Update manifest.json version
       run: |
