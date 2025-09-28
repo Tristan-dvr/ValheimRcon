@@ -1,3 +1,6 @@
+### 1.2.2
+- Fixed rcon packet size limit issue (huge thanks to **ourbob** for finding the issue)
+
 ### 1.2.1
 - Improved give command
 
