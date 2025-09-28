@@ -112,6 +112,8 @@
     <Compile Include="Commands\Unban.cs" />
     <Compile Include="Commands\WorldSave.cs" />
     <Compile Include="Core\AsynchronousSocketListener.cs" />
+    <Compile Include="Core\IRconConnectionManager.cs" />
+    <Compile Include="Core\IRconPeer.cs" />
     <Compile Include="Core\PacketType.cs" />
     <Compile Include="Core\RconCommandHandler.cs" />
     <Compile Include="Core\RconCommandReceiver.cs" />

@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="Commands\CommandArgsTests.cs" />
     <Compile Include="Core\RconPacketTests.cs" />
+    <Compile Include="Core\RconCommandReceiverTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

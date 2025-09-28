@@ -2,25 +2,22 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading.Tasks;
-using System.Threading;
 
 namespace ValheimRcon.Core
 {
-    public class AsynchronousSocketListener
+    public sealed class AsynchronousSocketListener : IRconConnectionManager
     {
         private static readonly TimeSpan UnauthorizedClientLifetime = TimeSpan.FromSeconds(30);
 
-        internal delegate void MessageReceived(RconPeer peer, RconPacket package);
-        internal event MessageReceived OnMessage;
+        public event Action<IRconPeer, RconPacket> OnMessage;
 
         // Create a TCP/IP socket.  
         private readonly IPAddress _address;
         private readonly int _port;
         private readonly Socket _listener;
-        private readonly HashSet<RconPeer> _clients = new HashSet<RconPeer>();
-        private readonly HashSet<RconPeer> _waitingForDisconnect = new HashSet<RconPeer>();
-        private readonly List<RconPeer> _clientsSnapshot = new List<RconPeer>();
+        private readonly HashSet<IRconPeer> _clients = new HashSet<IRconPeer>();
+        private readonly HashSet<IRconPeer> _waitingForDisconnect = new HashSet<IRconPeer>();
+        private readonly List<IRconPeer> _clientsSnapshot = new List<IRconPeer>();
         private readonly object _clientsLock = new object();
         private readonly object _disconnectLock = new object();
         private IDisposable _acceptThread;
@@ -56,38 +53,6 @@ namespace ValheimRcon.Core
             }
         }
 
-        public async Task SendAsync(RconPeer peer, RconPacket packet)
-        {
-            if (peer.IsDisposed)
-            {
-                Log.Debug("Tried to send to a disposed peer.");
-                return;
-            }
-
-            string endpointString = "unknown";
-            try
-            {
-                var socket = peer.socket;
-                if (socket == null || !socket.Connected)
-                {
-                    Log.Debug("Warning: Socket is null or not connected");
-                    return;
-                }
-
-                var byteData = packet.Serialize();
-                var bytesSent = await socket.SendAsync(new ArraySegment<byte>(byteData), SocketFlags.None);
-                endpointString = socket.RemoteEndPoint.ToString();
-                Log.Debug($"Sent {bytesSent} bytes to client [{endpointString}]");
-            }
-            catch (ObjectDisposedException)
-            {
-                Log.Debug($"Attempted to send to a disposed socket ({endpointString}).");
-            }
-            catch (Exception e)
-            {
-                Log.Error(e);
-            }
-        }
 
         public void Update()
         {
@@ -101,7 +66,7 @@ namespace ValheimRcon.Core
             // Process clients without holding the lock
             foreach (var client in _clientsSnapshot)
             {
-                if (!IsConnected(client))
+                if (!client.IsConnected())
                 {
                     Disconnect(client);
                 }
@@ -112,7 +77,10 @@ namespace ValheimRcon.Core
                 }
                 else
                 {
-                    TryReceive(client);
+                    if (client.TryReceive(out var packet))
+                    {
+                        OnMessage?.Invoke(client, packet);
+                    }
                 }
             }
 
@@ -131,7 +99,7 @@ namespace ValheimRcon.Core
             }
         }
 
-        public void Close()
+        public void Dispose()
         {
             _listener.Close();
             _acceptThread?.Dispose();
@@ -149,7 +117,7 @@ namespace ValheimRcon.Core
             }
         }
 
-        public void Disconnect(RconPeer peer)
+        public void Disconnect(IRconPeer peer)
         {
             lock (_disconnectLock)
             {
@@ -173,29 +141,6 @@ namespace ValheimRcon.Core
             }
         }
 
-        private void TryReceive(RconPeer peer)
-        {
-            var socket = peer.socket;
-            if (socket.Poll(0, SelectMode.SelectRead) && socket.Available > 0)
-            {
-                // Check available data before reading to prevent buffer overflow
-                var availableBytes = socket.Available;
-                if (availableBytes > peer.Buffer.Length)
-                {
-                    Log.Warning($"Available data exceeds buffer size: {availableBytes} > {peer.Buffer.Length} [{peer.Endpoint}]");
-                    Disconnect(peer);
-                    return;
-                }
-
-                // Use Receive with explicit buffer size to prevent overflow
-                var readCount = socket.Receive(peer.Buffer, 0, Math.Min(availableBytes, peer.Buffer.Length), SocketFlags.None);
-
-                if (readCount == 0)
-                    return;
-
-                OnPackageReceived(peer, readCount);
-            }
-        }
 
         private void OnClientConnected(Socket socket)
         {
@@ -214,31 +159,9 @@ namespace ValheimRcon.Core
             });
         }
 
-        private void OnPackageReceived(RconPeer peer, int readCount)
-        {
-            var socket = peer.socket;
-            Log.Debug($"Got package from client, {readCount} bytes [{peer.Endpoint}]");
 
-            try
-            {
-                var package = new RconPacket(peer.Buffer);
-                Log.Debug($"Received package {package}");
-                OnMessage?.Invoke(peer, package);
-            }
-            catch (Exception e)
-            {
-                Log.Warning($"Failed to parse packet from [{peer.Endpoint}]: {e.Message}");
-                Disconnect(peer);
-            }
-            finally
-            {
-                Array.Clear(peer.Buffer, 0, peer.Buffer.Length);
-            }
-        }
-
-        private void DisconnectPeer(RconPeer peer)
+        private void DisconnectPeer(IRconPeer peer)
         {
-            var socket = peer.socket;
             Log.Debug($"Client disconnected [{peer.Endpoint}]");
             try
             {
@@ -250,17 +173,10 @@ namespace ValheimRcon.Core
             }
         }
 
-        private static bool IsConnected(RconPeer peer)
-        {
-            var socket = peer.socket;
-            return socket.Connected
-                && !(socket.Poll(0, SelectMode.SelectRead) && socket.Available == 0);
-        }
-
-        private static bool IsUnauthorizedTimeout(RconPeer peer)
+        private static bool IsUnauthorizedTimeout(IRconPeer peer)
         {
             return !peer.Authentificated
-                && DateTime.Now - peer.created > UnauthorizedClientLifetime;
+                && DateTime.Now - peer.Created > UnauthorizedClientLifetime;
         }
     }
 

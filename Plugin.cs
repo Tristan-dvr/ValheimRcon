@@ -64,7 +64,7 @@ namespace ValheimRcon
             _discordService.Dispose();
         }
 
-        private void SendResultToDiscord(RconPeer peer, string command, IReadOnlyList<string> args, CommandResult result)
+        private void SendResultToDiscord(IRconPeer peer, string command, IReadOnlyList<string> args, CommandResult result)
         {
             if (string.IsNullOrEmpty(DiscordUrl.Value))
                 return;

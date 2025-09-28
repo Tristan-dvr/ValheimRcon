@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Net;
 using System.Text.RegularExpressions;
 
 namespace ValheimRcon.Core
@@ -10,11 +9,11 @@ namespace ValheimRcon.Core
         private const int MaxPayloadSize = 4080;
         private static readonly Regex MatchRegex = new Regex(@"(?<=[ ][\""]|^[\""])[^\""]+(?=[\""][ ]|[\""]$)|(?<=[ ]|^)[^\"" ]+(?=[ ]|$)", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
-        private readonly AsynchronousSocketListener _socketListener;
+        private readonly IRconConnectionManager _manager;
         private readonly string _password;
-        private RconCommandHandler _commandHandler;
+        private readonly RconCommandHandler _commandHandler;
 
-        public RconCommandReceiver(int port, string password, RconCommandHandler commandHandler)
+        public RconCommandReceiver(IRconConnectionManager connectionManager, string password, RconCommandHandler commandHandler)
         {
             if (string.IsNullOrEmpty(password))
                 throw new ArgumentException("Password cannot be null or empty", nameof(password));
@@ -23,20 +22,20 @@ namespace ValheimRcon.Core
                 throw new ArgumentNullException(nameof(commandHandler));
             
             _password = password;
-            _socketListener = new AsynchronousSocketListener(IPAddress.Any, port);
-            _socketListener.OnMessage += SocketListener_OnMessage;
+            _manager = connectionManager;
+            _manager.OnMessage += SocketListener_OnMessage;
             _commandHandler = commandHandler;
         }
 
-        public void StartListening() => _socketListener.StartListening();
+        public void Update() => _manager.Update();
 
-        public void Update() => _socketListener.Update();
-
-        public void Dispose() => _socketListener.Close();
-
-        private async void SocketListener_OnMessage(RconPeer peer, RconPacket packet)
+        public void Dispose()
         {
-            var socket = peer.socket;
+            _manager.OnMessage -= SocketListener_OnMessage;
+        }
+
+        private async void SocketListener_OnMessage(IRconPeer peer, RconPacket packet)
+        {
 
             switch (packet.type)
             {
@@ -45,8 +44,8 @@ namespace ValheimRcon.Core
                         if (peer.Authentificated)
                         {
                             Log.Error($"Already authorized [{peer.Endpoint}]");
-                            await _socketListener.SendAsync(peer, new RconPacket(packet.requestId, PacketType.Command, "Already authorized"));
-                            _socketListener.Disconnect(peer);
+                            await peer.SendAsync(new RconPacket(packet.requestId, PacketType.Command, "Already authorized"));
+                            _manager.Disconnect(peer);
                             break;
                         }
 
@@ -63,10 +62,10 @@ namespace ValheimRcon.Core
                         }
 
                         Log.Debug($"Login result {result}");
-                        await _socketListener.SendAsync(peer, result);
+                        await peer.SendAsync(result);
 
                         if (!success)
-                            _socketListener.Disconnect(peer);
+                            _manager.Disconnect(peer);
                         break;
                     }
                 case PacketType.Command:
@@ -74,8 +73,8 @@ namespace ValheimRcon.Core
                         if (!peer.Authentificated)
                         {
                             Log.Warning($"Not authorized [{peer.Endpoint}]");
-                            await _socketListener.SendAsync(peer, new RconPacket(packet.requestId, packet.type, "Unauthorized"));
-                            _socketListener.Disconnect(peer);
+                            await peer.SendAsync(new RconPacket(packet.requestId, packet.type, "Unauthorized"));
+                            _manager.Disconnect(peer);
                             break;
                         }
 
@@ -90,7 +89,7 @@ namespace ValheimRcon.Core
                         if (data.Count == 0)
                         {
                             Log.Warning($"Empty command from [{peer.Endpoint}]");
-                            await _socketListener.SendAsync(peer, new RconPacket(packet.requestId, packet.type, "Empty command"));
+                            await peer.SendAsync(new RconPacket(packet.requestId, packet.type, "Empty command"));
                             break;
                         }
                         
@@ -98,25 +97,31 @@ namespace ValheimRcon.Core
                         data.RemoveAt(0);
 
                         var response = await _commandHandler(peer, command, data);
-                        var payloadSize = RconPacket.GetPayloadSize(response);
-                        if (payloadSize > MaxPayloadSize)
-                        {
-                            var newLength = response.Length / 2;
-                            response = RconCommandsUtil.TruncateMessage(response, newLength)
-                                + "\n--- message truncated ---";
-                        }
-
+                        response = ValidatePayloadLength(response);
                         var result = new RconPacket(packet.requestId, packet.type, response);
                         Log.Debug($"Command result {command} - {result}");
-                        await _socketListener.SendAsync(peer, result);
+                        await peer.SendAsync(result);
                         break;
                     }
                 default:
                     Log.Error($"Unknown packet type: {packet} [{peer.Endpoint}]");
-                    await _socketListener.SendAsync(peer, new RconPacket(packet.requestId, PacketType.Error, "Cannot handle command"));
-                    _socketListener.Disconnect(peer);
+                    await peer.SendAsync(new RconPacket(packet.requestId, PacketType.Error, "Cannot handle command"));
+                    _manager.Disconnect(peer);
                     break;
             }
+        }
+        
+        private string ValidatePayloadLength(string payload)
+        {
+            var payloadSize = RconPacket.GetPayloadSize(payload);
+            if (payloadSize > MaxPayloadSize)
+            {
+                var newLength = MaxPayloadSize - 100;
+                return RconCommandsUtil.TruncateMessage(payload, newLength)
+                    + "\n--- message truncated ---";
+            }
+
+            return payload;
         }
     }
 }

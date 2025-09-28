@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -11,13 +12,14 @@ namespace ValheimRcon
 {
     public class RconProxy : MonoBehaviour
     {
-        internal delegate void CompletedCommandDelegate(RconPeer peer, string command, IReadOnlyList<string> args, CommandResult result);
+        internal delegate void CompletedCommandDelegate(IRconPeer peer, string command, IReadOnlyList<string> args, CommandResult result);
 
         private RconCommandReceiver _receiver;
 
         public static RconProxy Instance { get; private set; }
 
         private Dictionary<string, IRconCommand> _commands = new Dictionary<string, IRconCommand>();
+        private IRconConnectionManager _connectionManager;
 
         internal event CompletedCommandDelegate OnCommandCompleted;
 
@@ -25,7 +27,19 @@ namespace ValheimRcon
         {
             Instance = this;
 
-            _receiver = new RconCommandReceiver(Plugin.Port.Value, Plugin.Password.Value, HandleCommandAsync);
+            _connectionManager = new AsynchronousSocketListener(IPAddress.Any, Plugin.Port.Value);
+            _receiver = new RconCommandReceiver(_connectionManager, Plugin.Password.Value, new RconCommandHandler(HandleCommandAsync));
+        }
+
+        internal void Startup()
+        {
+            _connectionManager.StartListening();
+        }
+
+        internal void ShutDown()
+        {
+            _receiver.Dispose();
+            _connectionManager.Dispose();
         }
 
         private void Update()
@@ -61,7 +75,7 @@ namespace ValheimRcon
             RegisterCommand(new ActionCommand(command, description, commandFunc));
         }
 
-        private async Task<string> HandleCommandAsync(RconPeer peer, string command, IReadOnlyList<string> args)
+        private async Task<string> HandleCommandAsync(IRconPeer peer, string command, IReadOnlyList<string> args)
         {
             var completionSource = new TaskCompletionSource<CommandResult>();
             ThreadingUtil.RunInMainThread(() => RunCommand(command, args, completionSource));
@@ -100,14 +114,14 @@ namespace ValheimRcon
             [HarmonyPatch(typeof(ZNet), nameof(ZNet.LoadWorld))]
             private static void ZNet_LoadWorld()
             {
-                Instance._receiver.StartListening();
+                Instance.Startup();
             }
 
             [HarmonyPrefix]
             [HarmonyPatch(typeof(Game), nameof(Game.Shutdown))]
             private static void Game_Shutdown()
             {
-                Instance._receiver.Dispose();
+                Instance.ShutDown();
             }
         }
 
