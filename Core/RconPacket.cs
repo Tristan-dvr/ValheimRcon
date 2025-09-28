@@ -6,6 +6,9 @@ namespace ValheimRcon.Core
 {
     public readonly struct RconPacket
     {
+        public const int MaxPayloadSize = 4050;
+        private const int MaxPacketLength = 4096;
+
         public readonly int requestId;
         public readonly PacketType type;
         public readonly string payload;
@@ -16,10 +19,10 @@ namespace ValheimRcon.Core
                 throw new ArgumentNullException(nameof(bytes));
             
             if (bytes.Length < 14) // Minimum packet size: length(4) + requestId(4) + type(4) + null terminator(2)
-                throw new ArgumentException("Packet too small", nameof(bytes));
+                throw new ArgumentException($"Packet too small - {bytes.Length} bytes", nameof(bytes));
             
             if (bytes.Length > 65536) // Limit buffer size to prevent DoS attacks
-                throw new ArgumentException("Packet too large", nameof(bytes));
+                throw new ArgumentException($"Packet too large - {bytes.Length} bytes", nameof(bytes));
 
             using (var stream = new MemoryStream(bytes))
             using (var reader = new BinaryReader(stream))
@@ -28,32 +31,32 @@ namespace ValheimRcon.Core
                 
                 // Validate length
                 if (length < 0)
-                    throw new ArgumentException("Invalid packet length", nameof(bytes));
+                    throw new ArgumentException($"Invalid packet length - {length}", nameof(bytes));
                 
                 // Minimum packet data length: requestId(4) + type(4) + null terminator(2) = 10 bytes
                 if (length < 10)
-                    throw new ArgumentException("Packet data too small", nameof(bytes));
+                    throw new ArgumentException($"Packet data too small - {length}", nameof(bytes));
                 
                 // Check if we have enough bytes for the declared length + 4 bytes for length field itself
                 if (length > int.MaxValue - 4 || length + 4 > bytes.Length)
-                    throw new ArgumentException("Packet length exceeds buffer size", nameof(bytes));
+                    throw new ArgumentException($"Packet length exceeds buffer size - {length}", nameof(bytes));
                 
                 requestId = reader.ReadInt32();
                 type = (PacketType)reader.ReadInt32();
                 
                 // Validate packet type
                 if (!Enum.IsDefined(typeof(PacketType), type))
-                    throw new ArgumentException("Invalid packet type", nameof(bytes));
+                    throw new ArgumentException($"Invalid packet type {type}", nameof(bytes));
                 
                 // Calculate payload size safely
                 const int headerSize = sizeof(int) * 2 + 2; // requestId + type + null terminator
                 var payloadSize = length - headerSize;
                 
                 if (payloadSize < 0)
-                    throw new ArgumentException("Invalid payload size", nameof(bytes));
+                    throw new ArgumentException($"Invalid payload size - {payloadSize} bytes", nameof(bytes));
                 
-                if (payloadSize > 4096) // Limit payload size to prevent memory exhaustion
-                    throw new ArgumentException("Payload too large", nameof(bytes));
+                if (payloadSize > MaxPayloadSize) // Limit payload size to prevent memory exhaustion
+                    throw new ArgumentException($"Payload too large - {payloadSize} bytes", nameof(bytes));
                 
                 var payloadBytes = reader.ReadBytes(payloadSize);
                 payload = Encoding.UTF8.GetString(payloadBytes);
@@ -62,12 +65,15 @@ namespace ValheimRcon.Core
 
         public RconPacket(int requestId, PacketType type, string payload)
         {
-            if (payload != null && GetPayloadSize(payload) > 4096)
-                throw new ArgumentException("Payload too large", nameof(payload));
+            payload = payload ?? string.Empty;
+
+            var payloadSize = GetPayloadSize(payload);
+            if (payloadSize > MaxPayloadSize)
+                throw new ArgumentException($"Payload too large - {payloadSize} bytes", nameof(payload));
             
             this.requestId = requestId;
             this.type = type;
-            this.payload = payload ?? string.Empty;
+            this.payload = payload;
         }
 
         public byte[] Serialize()
@@ -92,8 +98,8 @@ namespace ValheimRcon.Core
 
                 // Calculate and write the actual length
                 var totalLength = stream.Position - lengthPosition - 4; // Exclude length field itself
-                if (totalLength > int.MaxValue)
-                    throw new InvalidOperationException("Packet too large for serialization");
+                if (totalLength > MaxPacketLength)
+                    throw new InvalidOperationException($"Packet too large for serialization - {totalLength}");
                 
                 var dataLength = (int)totalLength;
                 stream.Position = lengthPosition;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using ValheimRcon.Commands;
 
 namespace ValheimRcon
@@ -12,6 +13,31 @@ namespace ValheimRcon
             if (message.Length <= maxLength)
                 return message;
             return message.Substring(0, maxLength) + "...";
+        }
+
+        public static string TruncateMessageByBytes(string message, int maxBytes)
+        {
+            if (string.IsNullOrEmpty(message))
+                return message;
+
+            var bytes = Encoding.UTF8.GetBytes(message);
+            if (bytes.Length <= maxBytes)
+                return message;
+
+            var result = new StringBuilder();
+            var currentBytes = 0;
+            
+            for (int i = 0; i < message.Length; i++)
+            {
+                var charBytes = Encoding.UTF8.GetByteCount(message[i].ToString());
+                if (currentBytes + charBytes > maxBytes)
+                    break;
+                    
+                result.Append(message[i]);
+                currentBytes += charBytes;
+            }
+            
+            return result.ToString();
         }
 
         public static void RegisterAllCommands(Assembly assembly)

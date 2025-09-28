@@ -6,7 +6,6 @@ namespace ValheimRcon.Core
 {
     public class RconCommandReceiver : IDisposable
     {
-        private const int MaxPayloadSize = 4080;
         private static readonly Regex MatchRegex = new Regex(@"(?<=[ ][\""]|^[\""])[^\""]+(?=[\""][ ]|[\""]$)|(?<=[ ]|^)[^\"" ]+(?=[ ]|$)", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         private readonly IRconConnectionManager _manager;
@@ -113,12 +112,14 @@ namespace ValheimRcon.Core
         
         private string ValidatePayloadLength(string payload)
         {
+            const string truncatedMessage = "\n--- message truncated ---";
+
             var payloadSize = RconPacket.GetPayloadSize(payload);
-            if (payloadSize > MaxPayloadSize)
+            if (payloadSize > RconPacket.MaxPayloadSize)
             {
-                var newLength = MaxPayloadSize - 100;
-                return RconCommandsUtil.TruncateMessage(payload, newLength)
-                    + "\n--- message truncated ---";
+                var maxBytesForContent = RconPacket.MaxPayloadSize - RconPacket.GetPayloadSize(truncatedMessage);
+                var truncatedPayload = RconCommandsUtil.TruncateMessageByBytes(payload, maxBytesForContent);
+                return truncatedPayload + truncatedMessage;
             }
 
             return payload;

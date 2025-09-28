@@ -231,20 +231,31 @@ namespace ValheimRcon.Tests.Core
             Assert.AreEqual("-tamed", handledCommand.Arguments[6]);
         }
 
-        [TestCase(4081)]
-        [TestCase(5000)]
-        [TestCase(10000)]
-        [TestCase(50000)]
-        [TestCase(100000)]
-        [TestCase(500000)]
-        [TestCase(1000000)]
-        [TestCase(5000000)]
-        [TestCase(10000000)]
-        public void HandleMessage_CommandWithLongResponse_ShouldTruncate(int length)
+        // ASCII characters
+        [TestCase("A", 4051)]
+        [TestCase("A", 5000)]
+        [TestCase("A", 10000)]
+        [TestCase("A", 50000)]
+        [TestCase("A", 100000)]
+        [TestCase("A", 500000)]
+        [TestCase("A", 1000000)]
+        [TestCase("A", 5000000)]
+        [TestCase("A", 10000000)]
+        // Multi-byte UTF-8 characters
+        [TestCase("🎮", 1013)]
+        [TestCase("🎮", 2000)]
+        [TestCase("🎮", 3000)]
+        [TestCase("🎮", 5000)]
+        [TestCase("🎮", 10000)]
+        [TestCase("🎮", 50000)]
+        [TestCase("🎮", 100000)]
+        [TestCase("🎮", 500000)]
+        [TestCase("🎮", 1000000)]
+        public void HandleMessage_CommandWithLongResponse_ShouldTruncate(string symbol, int length)
         {
             var peer = CreateMockPeer();
             peer.SetAuthentificated(true);
-            var longResponse = new string('A', length);
+            var longResponse = string.Concat(Enumerable.Repeat(symbol, length));
             _mockCommandHandler.SetResponse(longResponse);
             
             var packet = new RconPacket(1, PacketType.Command, "testcommand");
@@ -257,16 +268,22 @@ namespace ValheimRcon.Tests.Core
             Assert.IsTrue(response.payload.EndsWith("--- message truncated ---"));
         }
 
-        [TestCase(10)]
-        [TestCase(100)]
-        [TestCase(1000)]
-        [TestCase(4000)]
-        [TestCase(4080)]
-        public void HandleMessage_CommandWithValidResponse_ShouldSendFullResponse(int length)
+        // ASCII characters
+        [TestCase("A", 10)]
+        [TestCase("A", 100)]
+        [TestCase("A", 1000)]
+        [TestCase("A", 4000)]
+        [TestCase("A", 4050)]
+        // Multi-byte UTF-8 characters
+        [TestCase("🎮", 10)]
+        [TestCase("🎮", 100)]
+        [TestCase("🎮", 1000)]
+        [TestCase("🎮", 1012)]
+        public void HandleMessage_CommandWithValidResponse_ShouldSendFullResponse(string symbol, int length)
         {
             var peer = CreateMockPeer();
             peer.SetAuthentificated(true);
-            var responseMessage = new string('A', length);
+            var responseMessage = string.Concat(Enumerable.Repeat(symbol, length));
             _mockCommandHandler.SetResponse(responseMessage);
             
             var packet = new RconPacket(1, PacketType.Command, "testcommand");
