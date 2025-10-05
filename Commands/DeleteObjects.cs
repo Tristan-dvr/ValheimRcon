@@ -10,8 +10,9 @@ namespace ValheimRcon.Commands
         public override string Description => "Delete objects matching all search criteria. " +
             "Usage (with optional arguments): deleteObjects " +
             "-creator <creator id> " +
-            "-tag <tag>";
             "-id <id:userid> " +
+            "-tag <tag> " +
+            "-force (bypass security checks)";
 
         protected override string OnHandle(CommandArgs args)
         {
@@ -25,6 +26,7 @@ namespace ValheimRcon.Commands
             long? creatorId = null;
             ObjectId? id = null;
             var tag = string.Empty;
+            var force = false;
 
             foreach (var index in optionalArgs)
             {
@@ -39,6 +41,9 @@ namespace ValheimRcon.Commands
                         break;
                     case "-tag":
                         tag = args.GetString(index + 1);
+                        break;
+                    case "-force":
+                        force = true;
                         break;
                     default:
                         return $"Unknown argument: {argument}";
@@ -62,10 +67,10 @@ namespace ValheimRcon.Commands
                 sb.Append($"- Prefab: {prefabName}");
                 ZdoUtils.AppendZdoStats(zdo, sb);
 
-                if (ZdoUtils.CanDeleteZdo(zdo))
+                if (force || ZdoUtils.CanDeleteZdo(zdo))
                 {
                     ZdoUtils.DeleteZDO(zdo);
-                    sb.AppendLine(" [deleted]");
+                    sb.AppendLine(" [DELETED]");
                 }
                 else
                 {
