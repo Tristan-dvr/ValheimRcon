@@ -18,11 +18,7 @@ namespace ValheimRcon.Commands
 
             foreach (var player in ZNet.instance.GetPeers())
             {
-                _builder.AppendFormat("{0}:{1} - {2}({3})",
-                    player.GetSteamId(),
-                    player.m_playerName,
-                    player.GetRefPos(),
-                    ZoneSystem.GetZone(player.GetRefPos()));
+                player.WritePlayerInfo(_builder);
 
                 _builder.AppendLine();
             }

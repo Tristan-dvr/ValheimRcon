@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace ValheimRcon.Commands
 {
@@ -14,7 +15,18 @@ namespace ValheimRcon.Commands
 
         public static ObjectId GetObjectId(this CommandArgs args, int index)
         {
-            return new ObjectId(args.GetUInt(index), args.GetLong(index + 1));
+            var text = args.GetString(index);
+            var parts = text.Split(':');
+            if (parts.Length == 2
+                && uint.TryParse(parts[0], out var id)
+                && long.TryParse(parts[1], out var userId))
+            {
+                return new ObjectId(id, userId);
+            }
+            else
+            {
+                throw new ArgumentException($"Cannot parse {text} as object id (expected format is ID:User)");
+            }
         }
     }
 }

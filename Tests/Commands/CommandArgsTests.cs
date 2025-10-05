@@ -330,5 +330,45 @@ namespace ValheimRcon.Tests.Commands
         }
 
         #endregion
+
+        #region GetObjectId Tests
+
+        [TestCase("123:456", 123U, 456L)]
+        [TestCase("0:0", 0U, 0L)]
+        [TestCase("4294967295:9223372036854775807", 4294967295U, 9223372036854775807L)]
+        [TestCase("1:1", 1U, 1L)]
+        [TestCase("999:12345678901234", 999U, 12345678901234L)]
+        [TestCase("123:-456", 123U, -456L)]
+        [TestCase("999:-9223372036854775808", 999U, -9223372036854775808L)]
+        public void GetObjectId_WithValidFormat_ShouldReturnCorrectValue(string input, uint expectedId, long expectedUserId)
+        {
+            var args = new[] { "command", input };
+            var commandArgs = new CommandArgs(args);
+
+            var result = commandArgs.GetObjectId(1);
+
+            Assert.AreEqual(expectedId, result.Id);
+            Assert.AreEqual(expectedUserId, result.UserId);
+        }
+
+        [TestCase("123")]
+        [TestCase("123:")]
+        [TestCase(":456")]
+        [TestCase("")]
+        [TestCase("abc:123")]
+        [TestCase("123:abc")]
+        [TestCase("123:456:789")]
+        [TestCase("-1:456")]
+        [TestCase("123.5:456")]
+        [TestCase("123:456.7")]
+        public void GetObjectId_WithInvalidFormat_ShouldThrowArgumentException(string input)
+        {
+            var args = new[] { "command", input };
+            var commandArgs = new CommandArgs(args);
+
+            Assert.Throws<ArgumentException>(() => commandArgs.GetObjectId(1));
+        }
+
+        #endregion
     }
 }

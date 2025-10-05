@@ -10,8 +10,8 @@ namespace ValheimRcon.Commands
         public override string Description => "Delete objects matching all search criteria. " +
             "Usage (with optional arguments): deleteObjects " +
             "-creator <creator id> " +
-            "-id <id> <userid> " +
             "-tag <tag>";
+            "-id <id:userid> " +
 
         protected override string OnHandle(CommandArgs args)
         {

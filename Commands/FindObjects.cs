@@ -11,7 +11,7 @@ namespace ValheimRcon.Commands
             "Usage (with optional arguments): findObjects " +
             "-prefab <prefab> " +
             "-creator <creator id> " +
-            "-id <id> <userid> " +
+            "-id <id:userid> " +
             "-tag <tag>";
 
         protected override string OnHandle(CommandArgs args)

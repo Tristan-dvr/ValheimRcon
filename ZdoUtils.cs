@@ -31,7 +31,7 @@ namespace ValheimRcon
 
         public static void AppendZdoStats(ZDO zdo, StringBuilder stringBuilder)
         {
-            stringBuilder.Append($" Id: {zdo.m_uid.ID} UserId: {zdo.m_uid.UserID}");
+            stringBuilder.Append($" Id: {zdo.m_uid.ID}:{zdo.m_uid.UserID}");
             stringBuilder.Append($" Position: {zdo.GetPosition()}({ZoneSystem.GetZone(zdo.GetPosition())})");
             stringBuilder.Append($" Rotation: {zdo.GetRotation().eulerAngles}");
 
