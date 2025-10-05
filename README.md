@@ -32,6 +32,7 @@ list
 ### Notice
 - Player management commands (kick, ban, heal, damage) should be used carefully
 - Object deletion commands are irreversible
+- The `-force` flag in `deleteObjects` bypasses safety checks and can remove critical game objects (zone controllers, dungeons, even player models). Use with extreme caution!
 
 If result of command execution is too long, it will be truncated in the RCON client, but the full result will be sent to Discord if you have configured a webhook URL in the plugin settings.
 For example if you execute findObjects command, it could return a lot of objects, and the RCON client will show only few of them. But the full result will be sent to Discord.

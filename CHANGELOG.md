@@ -1,3 +1,7 @@
+### 1.3.0
+- deleteObjects: added `-force` flag to bypass safety checks; use with extreme caution as it can delete critical game objects (zones, dungeons, player models)
+- Simplified object id to `id:userid` format
+
 ### 1.2.2
 - Fixed rcon packet size limit issue (huge thanks to **ourbob** for finding the issue)
 

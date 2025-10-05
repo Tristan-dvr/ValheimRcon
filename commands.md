@@ -159,7 +159,7 @@ Finds objects matching the provided search criteria (at least one criteria must 
 **Options:**
 - `-prefab <prefab>` - search by object type
 - `-creator <creator_id>` - search by creator ID (character ID, not Steam ID)
-- `-id <id> <userid>` - search by specific object ID
+- `-id <id:userid>` - search by specific object ID
 - `-tag <tag>` - search by tag
 
 ```
@@ -175,7 +175,7 @@ Finds objects within radius of specified position
 **Options:**
 - `-prefab <prefab>` - search by object type
 - `-creator <creator_id>` - search by creator ID (character ID, not Steam ID)
-- `-id <id> <userid>` - search by specific object ID
+- `-id <id:userid>` - search by specific object ID
 - `-tag <tag>` - search by tag
 
 ```
@@ -188,12 +188,15 @@ Deletes objects matching the provided search criteria (at least one criteria mus
 
 **Options:**
 - `-creator <creator_id>` - delete by creator ID
-- `-id <id> <userid>` - delete by specific object ID
+- `-id <id:userid>` - delete by specific object ID
 - `-tag <tag>` - delete by tag
+ - `-force` - bypass safety checks and force deletion
 
 ```
 deleteObjects -creator 193029
+deleteObjects -id 12345:67890
 deleteObjects -tag temp_objects
+deleteObjects -id 12345:67890 -force
 ```
 
 ---
@@ -274,7 +277,7 @@ Shows all global keys and their values
 1. **Steam ID** - unique player identifier in Steam (64-bit number)
 2. **Creator ID** - unique character identifier on the server (not Steam ID), visible on objects built by the player
 3. **Prefabs** - object names in the game (e.g., Boar, Rock, SwordBlackmetal). See [complete list of Valheim prefabs](https://valheim-modding.github.io/Jotunn/data/prefabs/overview.html)
-4. **Specific Object ID** - consists of id and userid, visible on objects found through findObjects command
+4. **Specific Object ID** - consists of `id:userid` (colon-separated). `userid` can be negative. Visible on objects found through `findObjects`
 5. **Coordinates** - position in Valheim world (x, y, z)
 6. **Tags** - custom labels for objects
 7. **Global Keys** - game system flags (e.g., defeated_bonemass)
