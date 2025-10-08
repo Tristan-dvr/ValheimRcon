@@ -1,3 +1,13 @@
+### 1.4.0
+- Changed custom object tag ZDO key to avoid conflict with portal tag (breaking: existing tagged objects created with older versions will not be found by tag)
+- Removed `findObjectsNear` command; use `findObjects -near <x> <y> <z> <radius>` instead
+- Expanded `findObjects` with `-near` filter to search within a radius around a position
+- Added `-tag-old <tag>` to `findObjects` to search objects that use the old tag key
+- Added `modifyObject` command to modify properties of persistent objects
+  - Supports changing position, rotation, health and custom tag
+  - Will not modify non-persistent objects or objects owned by online players unless `-force` is used to bypass safety checks
+  - Note: changes to position, rotation or health of objects currently owned by players may not be immediately visible to those players
+
 ### 1.3.0
 - deleteObjects: added `-force` flag to bypass safety checks; use with extreme caution as it can delete critical game objects (zones, dungeons, player models)
 - Simplified object id to `id:userid` format

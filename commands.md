@@ -157,29 +157,19 @@ Finds objects matching the provided search criteria (at least one criteria must 
 **Usage:** `findObjects [options]`
 
 **Options:**
+- `-near <x> <y> <z> <radius>` - limit search to a radius around position
 - `-prefab <prefab>` - search by object type
 - `-creator <creator_id>` - search by creator ID (character ID, not Steam ID)
 - `-id <id:userid>` - search by specific object ID
 - `-tag <tag>` - search by tag
+- `-tag-old <tag>` - search by old tag key (before 1.3.1)
 
 ```
 findObjects -prefab Boar
 findObjects -creator 193029
 findObjects -tag my_tag
-```
-
-### findObjectsNear
-Finds objects within radius of specified position  
-**Usage:** `findObjectsNear <x> <y> <z> <radius> [options]`
-
-**Options:**
-- `-prefab <prefab>` - search by object type
-- `-creator <creator_id>` - search by creator ID (character ID, not Steam ID)
-- `-id <id:userid>` - search by specific object ID
-- `-tag <tag>` - search by tag
-
-```
-findObjectsNear 100 50 200 50 -prefab Boar
+findObjects -near 100 50 200 50 -prefab Boar
+findObjects -tag-old battle_boars
 ```
 
 ### deleteObjects
@@ -197,6 +187,29 @@ deleteObjects -creator 193029
 deleteObjects -id 12345:67890
 deleteObjects -tag temp_objects
 deleteObjects -id 12345:67890 -force
+```
+
+### modifyObject
+Modifies properties of a persistent object.  
+**Usage:** `modifyObject <id:userid> [options]`
+
+**Options:**
+- `-position <x> <y> <z>` - set object position
+- `-rotation <x> <y> <z>` - set object rotation
+- `-health <value>` - set object health (if applicable)
+- `-tag <tag>` - set custom tag for the object
+- `-force` - bypass ownership and modification safety checks
+
+Notes:
+- The command will refuse to modify non-persistent objects (completely controlled by players).
+- By default the command will not modify objects owned by online players or protected by the server; use `-force` to override these checks.
+- Changes to position, rotation or health of objects currently owned by players may not be immediately visible to those players.
+
+```
+modifyObject 12345:67890 -position 100 50 200 -rotation 0 90 0
+modifyObject 12345:67890 -health 250
+modifyObject 12345:67890 -tag my_new_tag
+modifyObject 12345:67890 -position 100 50 200 -force
 ```
 
 ---
