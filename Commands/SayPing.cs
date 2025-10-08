@@ -11,10 +11,7 @@ namespace ValheimRcon.Commands
 
         protected override string OnHandle(CommandArgs args)
         {
-            var position = new Vector3();
-            position.x = args.GetInt(0);
-            position.y = args.GetInt(1);
-            position.z = args.GetInt(2);
+            var position = args.GetVector3(0);
 
             ZRoutedRpc.instance.InvokeRoutedRPC(ZRoutedRpc.Everybody,
                 "ChatMessage",
@@ -23,7 +20,7 @@ namespace ValheimRcon.Commands
                 Plugin.CommandsUserInfo,
                 "");
 
-            return $"Ping sent to {position}";
+            return $"Ping sent to {position.ToDisplayFormat()}";
         }
     }
 }

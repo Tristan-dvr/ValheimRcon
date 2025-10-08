@@ -82,8 +82,12 @@
     <Compile Include="Commands\DeleteObjects.cs" />
     <Compile Include="Commands\ExcludeAttribute.cs" />
     <Compile Include="Commands\FindObjects.cs" />
-    <Compile Include="Commands\FindObjectsNear.cs" />
-    <Compile Include="Commands\MoveObjectById.cs" />
+    <Compile Include="Commands\Modification\HealthModification.cs" />
+    <Compile Include="Commands\Modification\IZdoModification.cs" />
+    <Compile Include="Commands\Modification\PositionModification.cs" />
+    <Compile Include="Commands\Modification\RotationModification.cs" />
+    <Compile Include="Commands\Modification\TagModification.cs" />
+    <Compile Include="Commands\ModifyObject.cs" />
     <Compile Include="Commands\FindPlayer.cs" />
     <Compile Include="Commands\GetServerStats.cs" />
     <Compile Include="Commands\GiveItem.cs" />
@@ -103,6 +107,13 @@
     <Compile Include="Commands\RemovePermitted.cs" />
     <Compile Include="Commands\SayChat.cs" />
     <Compile Include="Commands\SayPing.cs" />
+    <Compile Include="Commands\Search\ISearchCriteria.cs" />
+    <Compile Include="Commands\Search\PrefabCriteria.cs" />
+    <Compile Include="Commands\Search\CreatorCriteria.cs" />
+    <Compile Include="Commands\Search\IdCriteria.cs" />
+    <Compile Include="Commands\Search\TagCriteria.cs" />
+    <Compile Include="Commands\Search\NearCriteria.cs" />
+    <Compile Include="Commands\Search\OldTagCriteria.cs" />
     <Compile Include="Commands\ServerLogs.cs" />
     <Compile Include="Commands\ShowMessage.cs" />
     <Compile Include="Commands\ShowPlayers.cs" />
@@ -121,6 +132,7 @@
     <Compile Include="Core\RconPeer.cs" />
     <Compile Include="Discord.cs" />
     <Compile Include="DiscordService.cs" />
+    <Compile Include="FormattingUtils.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="PlayerUtils.cs" />
     <Compile Include="Plugin.cs" />

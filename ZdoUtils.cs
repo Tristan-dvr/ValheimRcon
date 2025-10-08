@@ -24,16 +24,17 @@ namespace ValheimRcon
         private static readonly Dictionary<int, Type> PrefabTypes = new Dictionary<int, Type>();
         private static readonly Dictionary<int, float> MaxHealth = new Dictionary<int, float>();
         private static readonly Dictionary<int, float> MaxSupport = new Dictionary<int, float>();
+        private static readonly int TagZdoHash = "valheim_rcon_object_tag".GetStableHashCode();
 
-        public static string GetTag(this ZDO zdo) => zdo.GetString("tag");
+        public static string GetTag(this ZDO zdo) => zdo.GetString(TagZdoHash);
 
-        public static void SetTag(this ZDO zdo, string tag) => zdo.Set("tag", tag);
+        public static void SetTag(this ZDO zdo, string tag) => zdo.Set(TagZdoHash, tag);
 
         public static void AppendZdoStats(ZDO zdo, StringBuilder stringBuilder)
         {
             stringBuilder.Append($" Id: {zdo.m_uid.ID}:{zdo.m_uid.UserID}");
-            stringBuilder.Append($" Position: {zdo.GetPosition()}({ZoneSystem.GetZone(zdo.GetPosition())})");
-            stringBuilder.Append($" Rotation: {zdo.GetRotation().eulerAngles}");
+            stringBuilder.Append($" Position: {zdo.GetPosition().ToDisplayFormat()}({ZoneSystem.GetZone(zdo.GetPosition())})");
+            stringBuilder.Append($" Rotation: {zdo.GetRotation().ToDisplayFormat()}");
 
             var tag = zdo.GetTag();
             if (!string.IsNullOrEmpty(tag))
@@ -55,9 +56,11 @@ namespace ValheimRcon
             return prefab != null ? prefab.name : "Unknown";
         }
 
+        public static string GetPrefabName(this ZDO zdo) => GetPrefabName(zdo.GetPrefab());
+
         public static void DeleteZDO(ZDO zdo)
         {
-            if (!CanDeleteZdo(zdo))
+            if (!CanModifyZdo(zdo))
             {
                 return;
             }
@@ -74,7 +77,7 @@ namespace ValheimRcon
             ZDOMan.instance.DestroyZDO(zdo);
         }
 
-        public static bool CanDeleteZdo(ZDO zdo)
+        public static bool CanModifyZdo(ZDO zdo)
         {
             if (!zdo.IsValid())
             {
@@ -90,23 +93,6 @@ namespace ValheimRcon
                 return false;
             }
             if (GetPrefabTypes(zdo.GetPrefab()) == Type.None) // Unknown objects - be conservative
-            {
-                return false;
-            }
-            return true;
-        }
-
-        public static bool MatchesCriteria(ZDO zdo, long? creatorId, ObjectId? id, string tag)
-        {
-            if (creatorId.HasValue && zdo.GetLong(ZDOVars.s_creator) != creatorId.Value)
-            {
-                return false;
-            }
-            if (id.HasValue && (zdo.m_uid.ID != id.Value.Id || zdo.m_uid.UserID != id.Value.UserId))
-            {
-                return false;
-            }
-            if (!string.IsNullOrEmpty(tag) && zdo.GetTag() != tag)
             {
                 return false;
             }
@@ -147,7 +133,7 @@ namespace ValheimRcon
             {
                 return;
             }
-            stringBuilder.Append($" Durability: {zdo.GetFloat(ZDOVars.s_durability)}");
+            stringBuilder.Append($" Durability: {zdo.GetFloat(ZDOVars.s_durability).ToDisplayFormat()}");
             stringBuilder.Append($" Stack: {zdo.GetInt(ZDOVars.s_stack)}");
             stringBuilder.Append($" Quality: {zdo.GetInt(ZDOVars.s_quality)}");
             stringBuilder.Append($" Variant: {zdo.GetInt(ZDOVars.s_variant)}");
@@ -190,7 +176,7 @@ namespace ValheimRcon
 
             stringBuilder.Append($" Level: {zdo.GetInt(ZDOVars.s_level)}");
             var maxHealth = zdo.GetFloat(ZDOVars.s_maxHealth);
-            stringBuilder.Append($" Health: {zdo.GetFloat(ZDOVars.s_health, maxHealth)}/{maxHealth}");
+            stringBuilder.Append($" Health: {zdo.GetFloat(ZDOVars.s_health, maxHealth).ToDisplayFormat()}/{maxHealth.ToDisplayFormat()}");
             stringBuilder.Append($" Tamed: {zdo.GetBool(ZDOVars.s_tamed)}");
         }
 
@@ -204,8 +190,8 @@ namespace ValheimRcon
             stringBuilder.Append($" Creator: {zdo.GetLong(ZDOVars.s_creator)}");
             var maxHealth = MaxHealth.TryGetValue(zdo.GetPrefab(), out var health) ? health : 0f;
             var maxSupport = MaxSupport.TryGetValue(zdo.GetPrefab(), out var support) ? support : 0f;
-            stringBuilder.Append($" Health: {zdo.GetFloat(ZDOVars.s_health, maxHealth)}");
-            stringBuilder.Append($" Support: {zdo.GetFloat(ZDOVars.s_support, maxSupport)}");
+            stringBuilder.Append($" Health: {zdo.GetFloat(ZDOVars.s_health, maxHealth).ToDisplayFormat()}");
+            stringBuilder.Append($" Support: {zdo.GetFloat(ZDOVars.s_support, maxSupport).ToDisplayFormat()}");
         }
 
         private static bool CheckPrefabType(int prefabId, Type type)

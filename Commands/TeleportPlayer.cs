@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace ValheimRcon.Commands
+﻿namespace ValheimRcon.Commands
 {
     internal class TeleportPlayer : PlayerRconCommand
     {
@@ -12,8 +10,8 @@ namespace ValheimRcon.Commands
         {
             var position = args.GetVector3(1);
 
-            peer.InvokeRoutedRpcToZdo("RPC_TeleportTo", position, Quaternion.identity, true);
-            return $"Player {peer.GetPlayerInfo()} teleported to {position}";
+            peer.InvokeRoutedRpcToZdo("RPC_TeleportTo", position, zdo.GetRotation(), true);
+            return $"Player {peer.GetPlayerInfo()} teleported to {position.ToDisplayFormat()}";
         }
     }
 }

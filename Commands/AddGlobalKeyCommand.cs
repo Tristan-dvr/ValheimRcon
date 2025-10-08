@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ValheimRcon.Commands
+﻿namespace ValheimRcon.Commands
 {
     internal class AddGlobalKeyCommand : RconCommand
     {

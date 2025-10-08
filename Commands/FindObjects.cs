@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using ValheimRcon.Commands.Search;
 
 namespace ValheimRcon.Commands
 {
@@ -9,58 +11,54 @@ namespace ValheimRcon.Commands
 
         public override string Description => "Find objects matching all search criteria. " +
             "Usage (with optional arguments): findObjects " +
+            "-near <x> <y> <z> <radius> " +
             "-prefab <prefab> " +
             "-creator <creator id> " +
             "-id <id:userid> " +
-            "-tag <tag>";
+            "-tag <tag> " +
+            "-tag-old <tag>";
+
+        private readonly List<ISearchCriteria> _criterias = new List<ISearchCriteria>();
 
         protected override string OnHandle(CommandArgs args)
         {
             var optionalArgs = args.GetOptionalArguments();
-
-            if (!optionalArgs.Any())
-            {
-                return "At least one search criteria must be provided.";
-            }
-
-            var prefab = string.Empty;
-            long? creatorId = null;
-            ObjectId? id = null;
-            var tag = string.Empty;
-
+            _criterias.Clear();
             foreach (var index in optionalArgs)
             {
                 var argument = args.GetString(index);
                 switch (argument.ToLower())
                 {
                     case "-prefab":
-                        prefab = args.GetString(index + 1);
+                        _criterias.Add(new PrefabCriteria(args.GetString(index + 1)));
                         break;
                     case "-creator":
-                        creatorId = args.GetLong(index + 1);
+                        _criterias.Add(new CreatorCriteria(args.GetLong(index + 1)));
                         break;
                     case "-id":
-                        id = args.GetObjectId(index + 1);
+                        _criterias.Add(new IdCriteria(args.GetObjectId(index + 1)));
                         break;
                     case "-tag":
-                        tag = args.GetString(index + 1);
+                        _criterias.Add(new TagCriteria(args.GetString(index + 1)));
+                        break;
+                    case "-near":
+                        _criterias.Add(new NearCriteria(args.GetVector3(index + 1), args.GetFloat(index + 4)));
+                        break;
+                    case "-tag-old":
+                        _criterias.Add(new OldTagCriteria(args.GetString(index + 1)));
                         break;
                     default:
                         return $"Unknown argument: {argument}";
                 }
             }
-            var prefabHash = prefab.GetStableHashCode();
+
+            if (!_criterias.Any())
+            {
+                return "At least one criteria must be provided.";
+            }
 
             var objects = ZDOMan.instance.m_objectsByID.Values
-                .Where(zdo =>
-                {
-                    if (!string.IsNullOrEmpty(prefab) && zdo.GetPrefab() != prefabHash)
-                    {
-                        return false;
-                    }
-
-                    return ZdoUtils.MatchesCriteria(zdo, creatorId, id, tag);
-                })
+                .Where(zdo => _criterias.All(c => c.IsMatch(zdo)))
                 .ToArray();
 
             if (objects.Length == 0)

@@ -79,7 +79,8 @@ namespace ValheimRcon.Commands
             var totalCount = count;
             ZNetView.StartGhostInit();
             var sb = new StringBuilder();
-            sb.AppendLine($"Spawning items on player {peer.GetPlayerInfo()} {peer.GetRefPos()}:");
+            var position = zdo.GetPosition();
+            sb.AppendLine($"Spawning items on player {peer.GetPlayerInfo()} {position.ToDisplayFormat()}:");
             while (count > 0)
             {
                 var newItemData = itemData.Clone();
@@ -93,7 +94,7 @@ namespace ValheimRcon.Commands
                 if (sharedItemData.m_useDurability)
                     newItemData.m_durability = newItemData.GetMaxDurability();
 
-                var dropped = ItemDrop.DropItem(newItemData, stackSize, peer.GetRefPos(), Quaternion.identity);
+                var dropped = ItemDrop.DropItem(newItemData, stackSize, position, Quaternion.identity);
                 spawnedItems.Add(dropped);
 
                 count -= stackSize;
