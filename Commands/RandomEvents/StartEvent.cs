@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace ValheimRcon.Commands.RandomEvents
+﻿namespace ValheimRcon.Commands.RandomEvents
 {
     internal class StartEvent : RconCommand
     {
@@ -16,11 +14,7 @@ namespace ValheimRcon.Commands.RandomEvents
             if (ev == null)
                 return $"Event '{eventName}' not found.";
 
-            ZRoutedRpc.instance.InvokeRoutedRPC(ZRoutedRpc.Everybody,
-                "SetEvent",
-                ev.m_name,
-                ev.m_time,
-                position);
+            RandEventSystem.instance.SetRandomEvent(ev, position);
             return $"Event '{eventName}' started at {position.ToDisplayFormat()}";
         }
     }

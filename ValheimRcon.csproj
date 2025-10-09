@@ -81,6 +81,7 @@
     <Compile Include="Commands\CommandResult.cs" />
     <Compile Include="Commands\Players\Damage.cs" />
     <Compile Include="Commands\DeleteObjects.cs" />
+    <Compile Include="Commands\RandomEvents\CurrentEvent.cs" />
     <Compile Include="Commands\RandomEvents\EventsList.cs" />
     <Compile Include="Commands\ExcludeAttribute.cs" />
     <Compile Include="Commands\FindObjects.cs" />

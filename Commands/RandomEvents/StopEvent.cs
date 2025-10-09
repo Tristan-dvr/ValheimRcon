@@ -10,11 +10,7 @@ namespace ValheimRcon.Commands.RandomEvents
 
         protected override string OnHandle(CommandArgs args)
         {
-            ZRoutedRpc.instance.InvokeRoutedRPC(ZRoutedRpc.Everybody,
-                "SetEvent",
-                string.Empty,
-                0f,
-                Vector3.zero);
+            RandEventSystem.instance.ResetRandomEvent();
             return "Current random event stopped.";
         }
     }
