@@ -76,6 +76,10 @@ Shows the list of banned players
 Shows the list of permitted players  
 **Usage:** `permitted`
 
+### disconnectAll
+Disconnects all connected players from the server  
+**Usage:** `disconnectAll` 
+
 ---
 
 ## Player Interaction Commands
@@ -236,6 +240,32 @@ Sends a ping message to all players at the specified coordinates
 ```
 ping 100 50 200
 ```
+
+---
+
+## Random Events Commands
+
+Commands for controlling Valheim's random event system.
+
+### eventsList
+Prints all available random events  
+**Usage:** `eventsList`
+
+
+### startEvent
+Starts a random event at the specified position  
+**Usage:** `startEvent <event_name> <x> <y> <z>`  
+```
+startEvent Bats 100 50 200
+```
+
+### stopEvent
+Stops the currently active random event  
+**Usage:** `stopEvent`  
+
+### currentEvent
+Displays the currently active random event  
+**Usage:** `currentEvent` 
 
 ---
 

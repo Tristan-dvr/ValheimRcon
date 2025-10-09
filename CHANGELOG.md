@@ -7,6 +7,12 @@
   - Supports changing position, rotation, health and custom tag
   - Will not modify non-persistent objects or objects owned by online players unless `-force` is used to bypass safety checks
   - Note: changes to position, rotation or health of objects currently owned by players may not be immediately visible to those players
+- Added `disconnectAll` command to disconnect all connected players from the server
+- Added Random Events commands:
+  - `eventsList` - list all available random events
+  - `startEvent <event_name> <x> <y> <z>` - start a random event at the specified position
+  - `stopEvent` - stop the currently active random event
+  - `currentEvent` - show the currently active random event and position
 
 ### 1.3.0
 - deleteObjects: added `-force` flag to bypass safety checks; use with extreme caution as it can delete critical game objects (zones, dungeons, player models)
