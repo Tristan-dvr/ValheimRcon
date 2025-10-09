@@ -71,6 +71,7 @@
   <ItemGroup>
     <Compile Include="Commands\ActionCommand.cs" />
     <Compile Include="Commands\Admin\AddAdmin.cs" />
+    <Compile Include="Commands\Admin\DisconnectAll.cs" />
     <Compile Include="Commands\GlobalKeys\AddGlobalKeyCommand.cs" />
     <Compile Include="Commands\Admin\AddPermitted.cs" />
     <Compile Include="Commands\Admin\Ban.cs" />
