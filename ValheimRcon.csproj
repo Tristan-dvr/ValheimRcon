@@ -80,6 +80,7 @@
     <Compile Include="Commands\CommandResult.cs" />
     <Compile Include="Commands\Damage.cs" />
     <Compile Include="Commands\DeleteObjects.cs" />
+    <Compile Include="Commands\RandomEvents\EventsList.cs" />
     <Compile Include="Commands\ExcludeAttribute.cs" />
     <Compile Include="Commands\FindObjects.cs" />
     <Compile Include="Commands\Modification\HealthModification.cs" />
@@ -101,6 +102,8 @@
     <Compile Include="Commands\PrintBanlist.cs" />
     <Compile Include="Commands\PrintGlobalKeysCommand.cs" />
     <Compile Include="Commands\PrintPermitlist.cs" />
+    <Compile Include="Commands\RandomEvents\StartEvent.cs" />
+    <Compile Include="Commands\RandomEvents\StopEvent.cs" />
     <Compile Include="Commands\RconCommand.cs" />
     <Compile Include="Commands\RemoveAdmin.cs" />
     <Compile Include="Commands\RemoveGlobalKeyCommand.cs" />
