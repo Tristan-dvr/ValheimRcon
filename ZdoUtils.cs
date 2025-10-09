@@ -47,6 +47,11 @@ namespace ValheimRcon
             TryAppendCharacterData(zdo, stringBuilder);
             TryAppendGuardStoneData(zdo, stringBuilder);
             TryAppendItemStandData(zdo, stringBuilder);
+
+            if (!zdo.Persistent)
+            {
+                stringBuilder.Append(" [NOT PERSISTENT]");
+            }
         }
 
         public static string GetPrefabName(int prefabId)
@@ -59,10 +64,11 @@ namespace ValheimRcon
 
         public static void DeleteZDO(ZDO zdo)
         {
-            if (!CanModifyZdo(zdo))
+            if (!zdo.Persistent)
             {
                 return;
             }
+
             zdo.SetOwner(ZDOMan.GetSessionID());
 
             var connectionId = zdo.GetConnectionZDOID(ZDOExtraData.ConnectionType.Spawned);

@@ -67,7 +67,11 @@ namespace ValheimRcon.Commands
                 sb.Append($"- Prefab: {prefabName}");
                 ZdoUtils.AppendZdoStats(zdo, sb);
 
-                if (force || ZdoUtils.CanModifyZdo(zdo))
+                if (!zdo.Persistent)
+                {
+                    sb.AppendLine(" [NOT ALLOWED TO DELETE]");
+                }
+                else if (force || ZdoUtils.CanModifyZdo(zdo))
                 {
                     ZdoUtils.DeleteZDO(zdo);
                     sb.AppendLine(" [DELETED]");
