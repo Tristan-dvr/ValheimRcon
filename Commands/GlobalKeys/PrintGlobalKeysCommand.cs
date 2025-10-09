@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace ValheimRcon.Commands
+namespace ValheimRcon.Commands.GlobalKeys
 {
     internal class PrintGlobalKeysCommand : RconCommand
     {

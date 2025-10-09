@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Pool;
 using Object = UnityEngine.Object;
 
-namespace ValheimRcon.Commands
+namespace ValheimRcon.Commands.Players
 {
     internal class GiveItem : PlayerRconCommand
     {

@@ -1,4 +1,4 @@
-﻿namespace ValheimRcon.Commands
+﻿namespace ValheimRcon.Commands.GlobalKeys
 {
     internal class RemoveGlobalKeyCommand : RconCommand
     {

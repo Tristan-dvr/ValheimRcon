@@ -1,4 +1,4 @@
-﻿namespace ValheimRcon.Commands
+﻿namespace ValheimRcon.Commands.Players
 {
     public abstract class PlayerRconCommand : RconCommand
     {

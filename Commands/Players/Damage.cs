@@ -1,4 +1,4 @@
-﻿namespace ValheimRcon.Commands
+﻿namespace ValheimRcon.Commands.Players
 {
     internal class Damage : PlayerRconCommand
     {
