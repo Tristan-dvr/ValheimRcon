@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using ValheimRcon.Commands;
 
 namespace ValheimRcon
 {
     public static class ZdoUtils
     {
         [Flags]
-        private enum Type
+        public enum Type
         {
             None = 0,
             ItemDrop = 1 << 0,
@@ -194,7 +193,7 @@ namespace ValheimRcon
             stringBuilder.Append($" Support: {zdo.GetFloat(ZDOVars.s_support, maxSupport).ToDisplayFormat()}");
         }
 
-        private static bool CheckPrefabType(int prefabId, Type type)
+        public static bool CheckPrefabType(int prefabId, Type type)
         {
             if (!ZNetScene.instance.HasPrefab(prefabId))
             {
