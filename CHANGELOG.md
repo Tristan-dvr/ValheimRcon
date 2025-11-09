@@ -2,8 +2,8 @@
 - Added container inventory management commands:
   - `showContainer <id:userid>` - display inventory contents with item indices `[index]` for each item
   - `addItemToContainer <id:userid> <item_name> [options]` - add items to container
-    - options: `-count <count>` `-quality <quality>` `-variant <variant>` `-data <key> <value>`
-    - Default durability is set to maximum for the specified quality level`-nocrafter` `-durability <durability>` `-force`
+    - options: `-count <count>` `-quality <quality>` `-variant <variant>` `-data <key> <value>` `-nocrafter` `-durability <durability>` `-force`
+    - Default durability is set to maximum for the specified quality level
   - `removeItemFromContainer <id:userid> [options]` - remove items from container
     - options: `-index <index>` (recommended) or `-item <name>`, `-count <count>`, `-force`
     - Use `-index` to precisely target items when multiple items with the same name exist
