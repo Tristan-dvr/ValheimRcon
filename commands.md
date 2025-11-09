@@ -92,15 +92,17 @@ Gives an item to a player
 - `-count <count>` - number of items to give (default: 1)
 - `-quality <quality>` - item quality level (default: 1)
 - `-variant <variant>` - item variant (default: 0)
+- `-durability <durability>` - item durability value (default: maximum durability for the quality level)
 - `-data <key> <value>` - custom data for the item
 - `-nocrafter` - removes crafter information from the item
 
 ```
 give 76561198000000000 SwordBlackmetal
 give 76561198000000000 SwordBlackmetal -count 5 -quality 4
-give 76561198000000000 ArrowWood -count 100 -variant 1
+give 76561198000000000 ShieldWood -quality 3 -variant 1
 give 76561198000000000 OnionSoup -count 10 -data org.bepinex.plugins.cooking#Cooking.Cooking+CookingSkill 099 // gives 10 Onion Soups with 99 Cooking Skill
 give 76561198000000000 SwordIron -nocrafter // gives item without crafter information
+give 76561198000000000 SwordIron -quality 3 -durability 50 // gives item with custom durability
 ```
 
 ### heal
@@ -239,6 +241,82 @@ Sends a ping message to all players at the specified coordinates
 **Usage:** `ping <x> <y> <z>`  
 ```
 ping 100 50 200
+```
+
+---
+
+## Container Management Commands
+
+### showContainer
+Shows inventory contents of a container by object ID  
+**Usage:** `showContainer <id:userid>`  
+```
+showContainer 12345:67890
+```
+
+### addItemToContainer
+Adds an item to a container's inventory  
+**Usage:** `addItemToContainer <id:userid> <item_name> [options]`
+
+**Options:**
+- `-count <count>` - number of items to add (default: 1)
+- `-quality <quality>` - item quality level (default: 1)
+- `-variant <variant>` - item variant
+- `-durability <durability>` - item durability value (default: maximum durability for the quality level)
+- `-data <key> <value>` - custom data key-value pair
+- `-nocrafter` - don't set crafter info
+- `-force` - bypass ownership checks when container is not in use
+
+**Notes:**
+- The command will refuse to modify containers that are currently in use.
+- By default the command will not modify containers owned by online players; use `-force` to override this check (only works when container is not in use).
+
+```
+addItemToContainer 12345:67890 SwordIron -count 1 -quality 3
+addItemToContainer 12345:67890 Wood -count 50
+addItemToContainer 12345:67890 ShieldWood -variant 1 -nocrafter
+addItemToContainer 12345:67890 Wood -count 10 -force
+addItemToContainer 12345:67890 SwordIron -quality 3 -durability 50
+```
+
+### removeItemFromContainer
+Removes an item from a container's inventory  
+**Usage:** `removeItemFromContainer <id:userid> [options]`
+
+**Options:**
+- `-index <index>` - remove item by index (recommended when multiple items with the same name exist)
+- `-item <name>` - remove item by name
+- `-count <count>` - number of items to remove (default: 1)
+- `-force` - bypass ownership checks when container is not in use
+
+**Notes:**
+- **It is recommended to use `-index` instead of `-item`** to avoid ambiguity when multiple items with the same name exist in the container.
+- Use `showContainer` to see item indices.
+- Either `-index` or `-item` must be specified (but not both).
+- The command will refuse to modify containers that are currently in use.
+- By default the command will not modify containers owned by online players; use `-force` to override this check (only works when container is not in use).
+
+```
+removeItemFromContainer 12345:67890 -index 0
+removeItemFromContainer 12345:67890 -index 2 -count 5
+removeItemFromContainer 12345:67890 -item Wood -count 10
+removeItemFromContainer 12345:67890 -item Wood -count 5 -force
+```
+
+### clearContainer
+Clears all items from a container's inventory  
+**Usage:** `clearContainer <id:userid> [options]`
+
+**Options:**
+- `-force` - bypass ownership checks when container is not in use
+
+**Notes:**
+- The command will refuse to modify containers that are currently in use.
+- By default the command will not modify containers owned by online players; use `-force` to override this check (only works when container is not in use).
+
+```
+clearContainer 12345:67890
+clearContainer 12345:67890 -force
 ```
 
 ---

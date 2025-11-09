@@ -29,6 +29,13 @@ namespace ValheimRcon
 
         public static void SetTag(this ZDO zdo, string tag) => zdo.Set(TagZdoHash, tag);
 
+        public static void SetZdoModified(this ZDO zdo)
+        {
+            zdo.SetOwner(ZDOMan.GetSessionID());
+            zdo.DataRevision += 100;
+            ZDOMan.instance.ForceSendZDO(zdo.m_uid);
+        }
+
         public static void AppendZdoStats(ZDO zdo, StringBuilder stringBuilder)
         {
             stringBuilder.Append($" Id: {zdo.m_uid.ID}:{zdo.m_uid.UserID}");

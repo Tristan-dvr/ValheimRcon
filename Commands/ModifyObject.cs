@@ -83,13 +83,11 @@ namespace ValheimRcon.Commands
                 return $"Object is owned by an online player {ownerPlayer.GetPlayerInfo()} and cannot be modified.";
             }
 
-            zdo.SetOwner(ZDOMan.GetSessionID());
             foreach (var modification in _modifications)
             {
                 modification.Apply(zdo);
             }
-            zdo.DataRevision += 100;
-            ZDOMan.instance.ForceSendZDO(zdo.m_uid);
+            zdo.SetZdoModified();
 
             builder.Clear();
             builder.AppendLine("Object modified successfully");

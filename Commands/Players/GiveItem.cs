@@ -16,6 +16,7 @@ namespace ValheimRcon.Commands.Players
             "-count <count> " +
             "-quality <quality> " +
             "-variant <variant> " +
+            "-durability <durability> " +
             "-data <key> <value> " +
             "-nocrafter";
 
@@ -28,6 +29,7 @@ namespace ValheimRcon.Commands.Players
             string crafterName = Plugin.ServerChatName.Value;
             long crafterId = -1;
             Dictionary<string, string> data = new Dictionary<string, string>();
+            float? durabilityOverride = null;
 
             var prefab = ObjectDB.instance.GetItemPrefab(item);
             if (prefab == null) return $"Cannot find prefab {item}";
@@ -69,6 +71,10 @@ namespace ValheimRcon.Commands.Players
                             data[key] = value;
                         }
                         break;
+                    case "-durability":
+                        durabilityOverride = args.GetFloat(index + 1);
+                        if (durabilityOverride.Value < 0) return "Durability must be at least 0";
+                        break;
                     default:
                         return $"Unknown argument: {arg}";
                 }
@@ -92,7 +98,9 @@ namespace ValheimRcon.Commands.Players
                 newItemData.m_crafterName = crafterName;
                 newItemData.m_customData = data;
                 if (sharedItemData.m_useDurability)
-                    newItemData.m_durability = newItemData.GetMaxDurability();
+                {
+                    newItemData.m_durability = durabilityOverride.HasValue ? durabilityOverride.Value : newItemData.GetMaxDurability();
+                }
 
                 var dropped = ItemDrop.DropItem(newItemData, stackSize, position, Quaternion.identity);
                 spawnedItems.Add(dropped);

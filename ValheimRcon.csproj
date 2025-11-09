@@ -121,6 +121,12 @@
     <Compile Include="Commands\Search\OldTagCriteria.cs" />
     <Compile Include="Commands\ServerLogs.cs" />
     <Compile Include="Commands\ShowMessage.cs" />
+    <Compile Include="Commands\Container\ContainerRconCommand.cs" />
+    <Compile Include="Commands\Container\ShowContainerInventory.cs" />
+    <Compile Include="Commands\Container\AddItemToContainer.cs" />
+    <Compile Include="Commands\Container\RemoveItemFromContainer.cs" />
+    <Compile Include="Commands\Container\ClearContainerInventory.cs" />
+    <Compile Include="Commands\Container\ContainerUtils.cs" />
     <Compile Include="Commands\Players\ShowPlayers.cs" />
     <Compile Include="Commands\SpawnObject.cs" />
     <Compile Include="Commands\Players\TeleportPlayer.cs" />

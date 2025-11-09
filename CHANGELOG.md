@@ -1,3 +1,18 @@
+### 1.4.1
+- Added container inventory management commands:
+  - `showContainer <id:userid>` - display inventory contents with item indices `[index]` for each item
+  - `addItemToContainer <id:userid> <item_name> [options]` - add items to container
+    - options: `-count <count>` `-quality <quality>` `-variant <variant>` `-data <key> <value>`
+    - Default durability is set to maximum for the specified quality level`-nocrafter` `-durability <durability>` `-force`
+  - `removeItemFromContainer <id:userid> [options]` - remove items from container
+    - options: `-index <index>` (recommended) or `-item <name>`, `-count <count>`, `-force`
+    - Use `-index` to precisely target items when multiple items with the same name exist
+  - `clearContainer <id:userid> [options]` - clear container inventory
+    - options: `-force`
+- Added `-durability <durability>` option to `give` command
+  - Default durability is set to maximum for the specified quality level
+  - Use `-durability` to override the default value
+
 ### 1.4.0
 - Changed custom object tag ZDO key to avoid conflict with portal tag (breaking: existing tagged objects created with older versions will not be found by tag)
 - Removed `findObjectsNear` command; use `findObjects -near <x> <y> <z> <radius>` instead
