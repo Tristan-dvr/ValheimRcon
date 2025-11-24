@@ -22,13 +22,19 @@ namespace ValheimRcon
         private IRconConnectionManager _connectionManager;
 
         internal event CompletedCommandDelegate OnCommandCompleted;
+        internal event SecurityReportHandler OnSecurityReport;
 
         private void Awake()
         {
             Instance = this;
 
-            _connectionManager = new AsynchronousSocketListener(IPAddress.Any, Plugin.Port.Value);
-            _receiver = new RconCommandReceiver(_connectionManager, Plugin.Password.Value, new RconCommandHandler(HandleCommandAsync));
+            _connectionManager = new AsynchronousSocketListener(IPAddress.Any,
+                Plugin.Port.Value,
+                HandleSecurityReport);
+            _receiver = new RconCommandReceiver(_connectionManager,
+                Plugin.Password.Value,
+                HandleCommandAsync,
+                HandleSecurityReport);
         }
 
         internal void Startup()
@@ -46,6 +52,8 @@ namespace ValheimRcon
         {
             _receiver.Update();
         }
+
+        private void HandleSecurityReport(string endPoint, string reason) => OnSecurityReport?.Invoke(endPoint, reason);
 
         public void RegisterCommand<T>() where T : IRconCommand => RegisterCommand(typeof(T));
 

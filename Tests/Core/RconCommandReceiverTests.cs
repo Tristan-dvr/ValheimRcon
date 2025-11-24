@@ -22,7 +22,7 @@ namespace ValheimRcon.Tests.Core
             Log.CreateInstance(new MockLogSource());
             _mockConnectionManager = new MockRconConnectionManager();
             _mockCommandHandler = new MockRconCommandHandler();
-            _receiver = new RconCommandReceiver(_mockConnectionManager, TestPassword, new RconCommandHandler(_mockCommandHandler.HandleCommand));
+            _receiver = new RconCommandReceiver(_mockConnectionManager, TestPassword, new RconCommandHandler(_mockCommandHandler.HandleCommand), null);
         }
 
         [TearDown]
@@ -36,22 +36,22 @@ namespace ValheimRcon.Tests.Core
         [Test]
         public void Constructor_WithNullPassword_ShouldThrowArgumentException()
         {
-            Assert.Throws<ArgumentException>(() => 
-                new RconCommandReceiver(_mockConnectionManager, null, new RconCommandHandler(_mockCommandHandler.HandleCommand)));
+            Assert.Throws<ArgumentException>(() =>
+                new RconCommandReceiver(_mockConnectionManager, null, new RconCommandHandler(_mockCommandHandler.HandleCommand), null));
         }
 
         [Test]
         public void Constructor_WithEmptyPassword_ShouldThrowArgumentException()
         {
             Assert.Throws<ArgumentException>(() => 
-                new RconCommandReceiver(_mockConnectionManager, "", _mockCommandHandler.HandleCommand));
+                new RconCommandReceiver(_mockConnectionManager, "", _mockCommandHandler.HandleCommand, null));
         }
 
         [Test]
         public void Constructor_WithNullCommandHandler_ShouldThrowArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => 
-                new RconCommandReceiver(_mockConnectionManager, TestPassword, null));
+                new RconCommandReceiver(_mockConnectionManager, TestPassword, null, null));
         }
 
         #endregion
@@ -403,9 +403,10 @@ namespace ValheimRcon.Tests.Core
             return true;
         }
 
-        public bool TryReceive(out RconPacket packet)
+        public bool TryReceive(out RconPacket packet, out string error)
         {
             packet = default;
+            error = default;
             return false;
         }
 

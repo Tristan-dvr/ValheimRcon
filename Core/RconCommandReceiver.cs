@@ -11,8 +11,12 @@ namespace ValheimRcon.Core
         private readonly IRconConnectionManager _manager;
         private readonly string _password;
         private readonly RconCommandHandler _commandHandler;
+        private readonly SecurityReportHandler _securityReportHandler;
 
-        public RconCommandReceiver(IRconConnectionManager connectionManager, string password, RconCommandHandler commandHandler)
+        public RconCommandReceiver(IRconConnectionManager connectionManager,
+            string password,
+            RconCommandHandler commandHandler,
+            SecurityReportHandler securityReportHandler)
         {
             if (string.IsNullOrEmpty(password))
                 throw new ArgumentException("Password cannot be null or empty", nameof(password));
@@ -24,6 +28,7 @@ namespace ValheimRcon.Core
             _manager = connectionManager;
             _manager.OnMessage += SocketListener_OnMessage;
             _commandHandler = commandHandler;
+            _securityReportHandler = securityReportHandler;
         }
 
         public void Update() => _manager.Update();
@@ -43,6 +48,8 @@ namespace ValheimRcon.Core
                         if (peer.Authentificated)
                         {
                             Log.Error($"Already authorized [{peer.Endpoint}]");
+                            _securityReportHandler?.Invoke(peer.Endpoint, "Already authorized");
+
                             await peer.SendAsync(new RconPacket(packet.requestId, PacketType.Command, "Already authorized"));
                             _manager.Disconnect(peer);
                             break;
@@ -64,7 +71,10 @@ namespace ValheimRcon.Core
                         await peer.SendAsync(result);
 
                         if (!success)
+                        {
+                            _securityReportHandler?.Invoke(peer.Endpoint, "Login failed");
                             _manager.Disconnect(peer);
+                        }
                         break;
                     }
                 case PacketType.Command:
@@ -72,6 +82,8 @@ namespace ValheimRcon.Core
                         if (!peer.Authentificated)
                         {
                             Log.Warning($"Not authorized [{peer.Endpoint}]");
+                            _securityReportHandler?.Invoke(peer.Endpoint, "Unauthorized");
+
                             await peer.SendAsync(new RconPacket(packet.requestId, packet.type, "Unauthorized"));
                             _manager.Disconnect(peer);
                             break;
@@ -104,6 +116,8 @@ namespace ValheimRcon.Core
                     }
                 default:
                     Log.Error($"Unknown packet type: {packet} [{peer.Endpoint}]");
+                    _securityReportHandler?.Invoke(peer.Endpoint, $"Unknown packet type {packet}");
+
                     await peer.SendAsync(new RconPacket(packet.requestId, PacketType.Error, "Cannot handle command"));
                     _manager.Disconnect(peer);
                     break;

@@ -5,7 +5,7 @@ using System.Net.Sockets;
 
 namespace ValheimRcon.Core
 {
-    public sealed class AsynchronousSocketListener : IRconConnectionManager
+    internal sealed class AsynchronousSocketListener : IRconConnectionManager
     {
         private static readonly TimeSpan UnauthorizedClientLifetime = TimeSpan.FromSeconds(30);
 
@@ -18,21 +18,23 @@ namespace ValheimRcon.Core
         private readonly HashSet<IRconPeer> _clients = new HashSet<IRconPeer>();
         private readonly HashSet<IRconPeer> _waitingForDisconnect = new HashSet<IRconPeer>();
         private readonly List<IRconPeer> _clientsSnapshot = new List<IRconPeer>();
+        private readonly SecurityReportHandler _securityReportHandler;
         private readonly object _clientsLock = new object();
         private readonly object _disconnectLock = new object();
         private IDisposable _acceptThread;
 
-        public AsynchronousSocketListener(IPAddress ipAddress, int port)
+        public AsynchronousSocketListener(IPAddress ipAddress, int port, SecurityReportHandler securityReportHandler)
         {
             if (ipAddress == null)
                 throw new ArgumentNullException(nameof(ipAddress));
-            
+
             if (port < 1 || port > 65535)
                 throw new ArgumentOutOfRangeException(nameof(port), "Port must be between 1 and 65535");
-            
+
             _address = ipAddress;
             _port = port;
             _listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            _securityReportHandler = securityReportHandler;
         }
 
         public void StartListening()
@@ -63,6 +65,7 @@ namespace ValheimRcon.Core
                 _clientsSnapshot.AddRange(_clients);
             }
 
+            var now = DateTime.Now;
             // Process clients without holding the lock
             foreach (var client in _clientsSnapshot)
             {
@@ -70,17 +73,20 @@ namespace ValheimRcon.Core
                 {
                     Disconnect(client);
                 }
-                else if (IsUnauthorizedTimeout(client))
+                else if (!client.Authentificated && now > client.Created + UnauthorizedClientLifetime)
                 {
                     Log.Warning($"Unauthorized timeout [{client.Endpoint}]");
+                    _securityReportHandler?.Invoke(client.Endpoint, "Unauthorized timeout");
                     Disconnect(client);
                 }
-                else
+                else if (client.TryReceive(out var packet, out var error))
                 {
-                    if (client.TryReceive(out var packet))
-                    {
-                        OnMessage?.Invoke(client, packet);
-                    }
+                    OnMessage?.Invoke(client, packet);
+                }
+                else if (!string.IsNullOrEmpty(error))
+                {
+                    _securityReportHandler?.Invoke(client.Endpoint, error);
+                    Disconnect(client);
                 }
             }
 
@@ -172,12 +178,5 @@ namespace ValheimRcon.Core
                 Log.Debug("Warning: Could not dispose peer connection");
             }
         }
-
-        private static bool IsUnauthorizedTimeout(IRconPeer peer)
-        {
-            return !peer.Authentificated
-                && DateTime.Now - peer.Created > UnauthorizedClientLifetime;
-        }
     }
-
 }

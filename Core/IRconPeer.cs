@@ -11,6 +11,6 @@ namespace ValheimRcon.Core
         void SetAuthentificated(bool authentificated);
         Task SendAsync(RconPacket packet);
         bool IsConnected();
-        bool TryReceive(out RconPacket packet);
+        bool TryReceive(out RconPacket packet, out string error);
     }
 }

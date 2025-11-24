@@ -19,7 +19,7 @@ namespace ValheimRcon
     {
         public const string Guid = "org.tristan.rcon";
         public const string Name = "Valheim Rcon";
-        public const string Version = "1.4.1";
+        public const string Version = "1.5.0";
 
         private const int MaxDiscordMessageLength = 1900;
         private const int TruncatedMessageLength = 200;
@@ -28,6 +28,9 @@ namespace ValheimRcon
         public static ConfigEntry<string> Password;
         public static ConfigEntry<int> Port;
         public static ConfigEntry<string> ServerChatName;
+
+        public static ConfigEntry<string> DiscordSecurityUrl;
+        public static ConfigEntry<string> DiscordSecurityReportPrefix;
 
         private DiscordService _discordService;
         private StringBuilder _builder = new StringBuilder();
@@ -47,12 +50,16 @@ namespace ValheimRcon
             DiscordUrl = Config.Bind("2. Discord", "Webhook url", "", "Discord webhook for sending command results");
             ServerChatName = Config.Bind("3. Chat", "Server name", "Server", "Name of server to display messages sent with rcon command");
 
+            DiscordSecurityReportPrefix = Config.Bind("4. Security", "Message prefix", "@here Security alert", "Prefix attached to every security report");
+            DiscordSecurityUrl = Config.Bind("4. Security", "Webhook url", "", "Discord webhook for sending security reports");
+
             CommandsUserInfo.Name = ServerChatName.Value;
 
-            _discordService = new DiscordService(DiscordUrl.Value);
+            _discordService = new DiscordService();
 
             DontDestroyOnLoad(new GameObject(nameof(RconProxy), typeof(RconProxy)));
             RconProxy.Instance.OnCommandCompleted += SendResultToDiscord;
+            RconProxy.Instance.OnSecurityReport += SendReportToDiscord;
 
             RconCommandsUtil.RegisterAllCommands(Assembly.GetExecutingAssembly());
 
@@ -66,7 +73,8 @@ namespace ValheimRcon
 
         private void SendResultToDiscord(IRconPeer peer, string command, IReadOnlyList<string> args, CommandResult result)
         {
-            if (string.IsNullOrEmpty(DiscordUrl.Value))
+            var url = DiscordUrl.Value;
+            if (string.IsNullOrEmpty(url))
                 return;
 
             var fullCommand = $"{command} {string.Join(" ", args)}";
@@ -88,18 +96,44 @@ namespace ValheimRcon
                 var truncatedResult = RconCommandsUtil.TruncateMessage(result.Text, TruncatedMessageLength);
                 _builder.AppendLine(truncatedResult);
                 _builder.Append("*--- message truncated ---*");
-                _discordService.SendResult(_builder.ToString(), result.AttachedFilePath);
+
+                _discordService.SendResult(url,
+                    _builder.ToString(),
+                    result.AttachedFilePath);
 
                 var tempFilePath = Path.Combine(Paths.CachePath, $"{DateTime.UtcNow.Ticks}.txt");
                 FileHelpers.EnsureDirectoryExists(tempFilePath);
                 File.WriteAllText(tempFilePath, result.Text);
-                _discordService.SendResult("**Full message**", tempFilePath);
+
+                _discordService.SendResult(url,
+                    "**Full message**",
+                    tempFilePath);
             }
             else
             {
                 _builder.Append(result.Text);
-                _discordService.SendResult(_builder.ToString(), result.AttachedFilePath);
+                _discordService.SendResult(url,
+                    _builder.ToString(),
+                    result.AttachedFilePath);
             }
+        }
+
+        private void SendReportToDiscord(string endPoint, string reason)
+        {
+            var url = DiscordSecurityUrl.Value;
+            if (string.IsNullOrEmpty(url))
+                return;
+
+            _builder.Clear();
+            if (!string.IsNullOrEmpty(DiscordSecurityReportPrefix.Value))
+            {
+                _builder.AppendLine(DiscordSecurityReportPrefix.Value);
+            }
+            _builder.AppendFormat("[`{0}`] Disconnected for security reasons", endPoint);
+            _builder.AppendLine();
+            _builder.AppendFormat("**Reason**: {0}", reason);
+
+            _discordService.SendResult(url, _builder.ToString(), null);
         }
 
         [HarmonyPatch]

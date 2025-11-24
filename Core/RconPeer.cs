@@ -60,10 +60,11 @@ namespace ValheimRcon.Core
                 && !(_socket.Poll(0, SelectMode.SelectRead) && _socket.Available == 0);
         }
 
-        public bool TryReceive(out RconPacket packet)
+        public bool TryReceive(out RconPacket packet, out string error)
         {
             packet = default;
-            
+            error = null;
+
             if (_disposed)
                 return false;
             
@@ -72,7 +73,8 @@ namespace ValheimRcon.Core
                 var availableBytes = _socket.Available;
                 if (availableBytes > _buffer.Length)
                 {
-                    Log.Warning($"Available data exceeds buffer size: {availableBytes} > {_buffer.Length} [{Endpoint}]");
+                    error = $"Available data exceeds buffer size: {availableBytes} > {_buffer.Length}";
+                    Log.Warning($"{error} [{Endpoint}]");
                     return false;
                 }
 
@@ -89,6 +91,7 @@ namespace ValheimRcon.Core
                 catch (Exception e)
                 {
                     Log.Warning($"Failed to parse packet from [{Endpoint}]: {e.Message}");
+                    error = e.Message;
                     return false;
                 }
                 finally

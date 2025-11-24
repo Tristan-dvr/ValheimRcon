@@ -141,6 +141,7 @@
     <Compile Include="Core\RconCommandReceiver.cs" />
     <Compile Include="Core\RconPacket.cs" />
     <Compile Include="Core\RconPeer.cs" />
+    <Compile Include="Core\SecurityReportHandler.cs" />
     <Compile Include="Discord.cs" />
     <Compile Include="DiscordService.cs" />
     <Compile Include="FormattingUtils.cs" />
