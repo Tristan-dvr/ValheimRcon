@@ -1,5 +1,7 @@
-﻿using System;
+﻿using LukeSkywalker.IPNetwork;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 
@@ -19,11 +21,13 @@ namespace ValheimRcon.Core
         private readonly HashSet<IRconPeer> _waitingForDisconnect = new HashSet<IRconPeer>();
         private readonly List<IRconPeer> _clientsSnapshot = new List<IRconPeer>();
         private readonly SecurityReportHandler _securityReportHandler;
-        private readonly object _clientsLock = new object();
-        private readonly object _disconnectLock = new object();
-        private IDisposable _acceptThread;
+        private readonly IpAddressFilter _filter;
+        private bool _checkNewConnections;
 
-        public AsynchronousSocketListener(IPAddress ipAddress, int port, SecurityReportHandler securityReportHandler)
+        public AsynchronousSocketListener(IPAddress ipAddress,
+            int port,
+            SecurityReportHandler securityReportHandler,
+            IpAddressFilter filter)
         {
             if (ipAddress == null)
                 throw new ArgumentNullException(nameof(ipAddress));
@@ -33,6 +37,8 @@ namespace ValheimRcon.Core
 
             _address = ipAddress;
             _port = port;
+            _filter = filter;
+
             _listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             _securityReportHandler = securityReportHandler;
         }
@@ -47,7 +53,7 @@ namespace ValheimRcon.Core
                 _listener.Bind(localEndPoint);
                 _listener.Listen(100);
 
-                _acceptThread = ThreadingUtil.RunPeriodicalInSingleThread(TryAcceptClientThread, 100);
+                _checkNewConnections = true;
             }
             catch (Exception e)
             {
@@ -55,15 +61,13 @@ namespace ValheimRcon.Core
             }
         }
 
-
         public void Update()
         {
+            TryAcceptNewClients();
+
             // Create snapshot of clients for processing
-            lock (_clientsLock)
-            {
-                _clientsSnapshot.Clear();
-                _clientsSnapshot.AddRange(_clients);
-            }
+            _clientsSnapshot.Clear();
+            _clientsSnapshot.AddRange(_clients);
 
             var now = DateTime.Now;
             // Process clients without holding the lock
@@ -76,7 +80,7 @@ namespace ValheimRcon.Core
                 else if (!client.Authentificated && now > client.Created + UnauthorizedClientLifetime)
                 {
                     Log.Warning($"Unauthorized timeout [{client.Endpoint}]");
-                    _securityReportHandler?.Invoke(client.Endpoint, "Unauthorized timeout");
+                    _securityReportHandler?.Invoke(client.Endpoint, "Unauthorized timeout.");
                     Disconnect(client);
                 }
                 else if (client.TryReceive(out var packet, out var error))
@@ -91,48 +95,37 @@ namespace ValheimRcon.Core
             }
 
             // Process disconnections
-            lock (_disconnectLock)
+            foreach (var client in _waitingForDisconnect)
             {
-                foreach (var client in _waitingForDisconnect)
-                {
-                    lock (_clientsLock)
-                    {
-                        _clients.Remove(client);
-                    }
-                    DisconnectPeer(client);
-                }
-                _waitingForDisconnect.Clear();
+                _clients.Remove(client);
+                DisconnectPeer(client);
             }
+            _waitingForDisconnect.Clear();
         }
 
         public void Dispose()
         {
+            _checkNewConnections = false;
+
             _listener.Close();
-            _acceptThread?.Dispose();
-            
-            lock (_clientsLock)
-            {
-                foreach (var client in _clients)
-                    client.Dispose();
-                _clients.Clear();
-            }
-            
-            lock (_disconnectLock)
-            {
-                _waitingForDisconnect.Clear();
-            }
+
+            foreach (var client in _clients)
+                client.Dispose();
+            _clients.Clear();
+
+            _waitingForDisconnect.Clear();
         }
 
         public void Disconnect(IRconPeer peer)
         {
-            lock (_disconnectLock)
-            {
-                _waitingForDisconnect.Add(peer);
-            }
+            _waitingForDisconnect.Add(peer);
         }
 
-        private void TryAcceptClientThread()
+        private void TryAcceptNewClients()
         {
+            if (!_checkNewConnections)
+                return;
+
             try
             {
                 if (!_listener.Poll(0, SelectMode.SelectRead))
@@ -150,21 +143,30 @@ namespace ValheimRcon.Core
 
         private void OnClientConnected(Socket socket)
         {
-            // Create the state object.  
+            var remoteEndPoint = socket.RemoteEndPoint as IPEndPoint;
+            if (remoteEndPoint == null)
+            {
+                Log.Warning("Client connected with invalid endpoint");
+                _securityReportHandler?.Invoke(socket.RemoteEndPoint?.ToString(), "Rejected connection. Unknown endpoint.");
+                socket.Close();
+                return;
+            }
+
+            var clientAddress = remoteEndPoint.Address;
+
+            if (!_filter.IsAllowed(clientAddress))
+            {
+                Log.Warning($"Client connection rejected from [{remoteEndPoint}] - IP not allowed");
+                _securityReportHandler?.Invoke(remoteEndPoint.ToString(), "Rejected connection by IP filter.");
+                socket.Close();
+                return;
+            }
+
             var state = new RconPeer(socket);
 
             Log.Debug($"Client connected [{state.Endpoint}]");
-
-            //  Work with collection in main thread only
-            ThreadingUtil.RunInMainThread(() => 
-            {
-                lock (_clientsLock)
-                {
-                    _clients.Add(state);
-                }
-            });
+            _clients.Add(state);
         }
-
 
         private void DisconnectPeer(IRconPeer peer)
         {

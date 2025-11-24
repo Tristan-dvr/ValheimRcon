@@ -1,10 +1,12 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
+using LukeSkywalker.IPNetwork;
 using Splatform;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
@@ -28,6 +30,11 @@ namespace ValheimRcon
         public static ConfigEntry<string> Password;
         public static ConfigEntry<int> Port;
         public static ConfigEntry<string> ServerChatName;
+        public static IReadOnlyCollection<IPNetwork> WhiteList;
+        public static IReadOnlyCollection<IPNetwork> BlackList;
+
+        private static ConfigEntry<string> WhiteListConfig;
+        private static ConfigEntry<string> BlackListConfig;
 
         public static ConfigEntry<string> DiscordSecurityUrl;
         public static ConfigEntry<string> DiscordSecurityReportPrefix;
@@ -41,12 +48,16 @@ namespace ValheimRcon
             UserId = new PlatformUserID("Bot", 0, false),
         };
 
+        public static IpAddressFilter IpFilter = new IpAddressFilter();
+
         private void Awake()
         {
             Log.CreateInstance(Logger);
 
             Port = Config.Bind("1. Rcon", "Port", 2458, "Port to receive RCON commands");
             Password = Config.Bind("1. Rcon", "Password", System.Guid.NewGuid().ToString(), "Password for RCON packages validation");
+            WhiteListConfig = Config.Bind("1. Rcon", "Whitelist IP mask", "", "Comma-separated list of IP addresses or masks (e.g., 192.168.1.0/24, 10.0.0.1). If not empty, only these IPs are allowed.");
+            BlackListConfig = Config.Bind("1. Rcon", "Blacklist IP mask", "", "Comma-separated list of IP addresses or masks (e.g., 192.168.1.0/24, 10.0.0.1). Blocked IPs when whitelist is empty.");
             DiscordUrl = Config.Bind("2. Discord", "Webhook url", "", "Discord webhook for sending command results");
             ServerChatName = Config.Bind("3. Chat", "Server name", "Server", "Name of server to display messages sent with rcon command");
 
@@ -56,6 +67,9 @@ namespace ValheimRcon
             CommandsUserInfo.Name = ServerChatName.Value;
 
             _discordService = new DiscordService();
+
+            RefreshIpFilter();
+            Helper.WatchConfigFileChanges(Config, RefreshIpFilter);
 
             DontDestroyOnLoad(new GameObject(nameof(RconProxy), typeof(RconProxy)));
             RconProxy.Instance.OnCommandCompleted += SendResultToDiscord;
@@ -134,6 +148,19 @@ namespace ValheimRcon
             _builder.AppendFormat("**Reason**: {0}", reason);
 
             _discordService.SendResult(url, _builder.ToString(), null);
+        }
+
+        private void RefreshIpFilter()
+        {
+            var blackList = ParseList(BlackListConfig.Value);
+            var whiteList = ParseList(WhiteListConfig.Value);
+            IpFilter.RefreshFilter(whiteList, blackList);
+            Log.Debug($"IP filter updated {IpFilter}");
+        }
+
+        private static IEnumerable<string> ParseList(string config)
+        {
+            return config.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
         }
 
         [HarmonyPatch]

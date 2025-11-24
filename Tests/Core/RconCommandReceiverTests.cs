@@ -1,10 +1,9 @@
 using NUnit.Framework;
-using ValheimRcon.Core;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Net.Sockets;
 using System.Linq;
+using System.Threading.Tasks;
+using ValheimRcon.Core;
 
 namespace ValheimRcon.Tests.Core
 {
@@ -413,13 +412,6 @@ namespace ValheimRcon.Tests.Core
         public void Dispose()
         {
             // Mock implementation
-        }
-    }
-
-    public class MockLogSource : BepInEx.Logging.ManualLogSource
-    {
-        public MockLogSource() : base("Mock")
-        {
         }
     }
 

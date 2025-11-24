@@ -48,7 +48,7 @@ namespace ValheimRcon.Core
                         if (peer.Authentificated)
                         {
                             Log.Error($"Already authorized [{peer.Endpoint}]");
-                            _securityReportHandler?.Invoke(peer.Endpoint, "Already authorized");
+                            _securityReportHandler?.Invoke(peer.Endpoint, "Already authorized.");
 
                             await peer.SendAsync(new RconPacket(packet.requestId, PacketType.Command, "Already authorized"));
                             _manager.Disconnect(peer);
@@ -72,7 +72,7 @@ namespace ValheimRcon.Core
 
                         if (!success)
                         {
-                            _securityReportHandler?.Invoke(peer.Endpoint, "Login failed");
+                            _securityReportHandler?.Invoke(peer.Endpoint, "Login failed.");
                             _manager.Disconnect(peer);
                         }
                         break;
@@ -82,7 +82,7 @@ namespace ValheimRcon.Core
                         if (!peer.Authentificated)
                         {
                             Log.Warning($"Not authorized [{peer.Endpoint}]");
-                            _securityReportHandler?.Invoke(peer.Endpoint, "Unauthorized");
+                            _securityReportHandler?.Invoke(peer.Endpoint, "Unauthorized.");
 
                             await peer.SendAsync(new RconPacket(packet.requestId, packet.type, "Unauthorized"));
                             _manager.Disconnect(peer);
@@ -116,7 +116,7 @@ namespace ValheimRcon.Core
                     }
                 default:
                     Log.Error($"Unknown packet type: {packet} [{peer.Endpoint}]");
-                    _securityReportHandler?.Invoke(peer.Endpoint, $"Unknown packet type {packet}");
+                    _securityReportHandler?.Invoke(peer.Endpoint, $"Unknown packet type {packet}.");
 
                     await peer.SendAsync(new RconPacket(packet.requestId, PacketType.Error, "Cannot handle command"));
                     _manager.Disconnect(peer);

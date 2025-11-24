@@ -30,7 +30,8 @@ namespace ValheimRcon
 
             _connectionManager = new AsynchronousSocketListener(IPAddress.Any,
                 Plugin.Port.Value,
-                HandleSecurityReport);
+                HandleSecurityReport,
+                Plugin.IpFilter);
             _receiver = new RconCommandReceiver(_connectionManager,
                 Plugin.Password.Value,
                 HandleCommandAsync,
