@@ -33,16 +33,16 @@ namespace ValheimRcon.Tests.Core
         #region Constructor Tests
 
         [Test]
-        public void Constructor_WithNullPassword_ShouldThrowArgumentException()
+        public void Constructor_WithNullPassword_ShouldNotThrowArgumentException()
         {
             Assert.Throws<ArgumentException>(() =>
                 new RconCommandReceiver(_mockConnectionManager, null, new RconCommandHandler(_mockCommandHandler.HandleCommand), null));
         }
 
         [Test]
-        public void Constructor_WithEmptyPassword_ShouldThrowArgumentException()
+        public void Constructor_WithEmptyPassword_ShouldNotThrowException()
         {
-            Assert.Throws<ArgumentException>(() => 
+            Assert.DoesNotThrow(() => 
                 new RconCommandReceiver(_mockConnectionManager, "", _mockCommandHandler.HandleCommand, null));
         }
 
@@ -74,6 +74,30 @@ namespace ValheimRcon.Tests.Core
         }
 
         [TestCase("wrongpassword")]
+        [TestCase(TestPassword)]
+        [TestCase(" " + TestPassword + " ")]
+        [TestCase(null)]
+        [TestCase("      ")]
+        [TestCase("")]
+        public void HandleMessage_EmptyPassword_RejectEverything(string password)
+        {
+            _receiver.Dispose(); // should clear setup from global setup
+            _receiver = new RconCommandReceiver(_mockConnectionManager, "", new RconCommandHandler(_mockCommandHandler.HandleCommand), null);
+
+            var peer = CreateMockPeer();
+            var packet = new RconPacket(1, PacketType.Login, password);
+
+            _mockConnectionManager.TriggerOnMessage(peer, packet);
+
+            Assert.IsFalse(peer.Authentificated);
+            Assert.AreEqual(1, peer.SentPackets.Count);
+            var response = peer.SentPackets[0];
+            Assert.AreEqual(-1, response.requestId);
+            Assert.AreEqual("Login failed", response.payload);
+        }
+
+        [TestCase("wrongpassword")]
+        [TestCase(" " + TestPassword + " ")]
         [TestCase(null)]
         [TestCase("      ")]
         [TestCase("")]

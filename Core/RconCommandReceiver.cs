@@ -18,8 +18,8 @@ namespace ValheimRcon.Core
             RconCommandHandler commandHandler,
             SecurityReportHandler securityReportHandler)
         {
-            if (string.IsNullOrEmpty(password))
-                throw new ArgumentException("Password cannot be null or empty", nameof(password));
+            if (password == null)
+                throw new ArgumentException("Password cannot be null", nameof(password));
             
             if (commandHandler == null)
                 throw new ArgumentNullException(nameof(commandHandler));
@@ -40,7 +40,6 @@ namespace ValheimRcon.Core
 
         private async void SocketListener_OnMessage(IRconPeer peer, RconPacket packet)
         {
-
             switch (packet.type)
             {
                 case PacketType.Login:
@@ -56,7 +55,8 @@ namespace ValheimRcon.Core
                         }
 
                         RconPacket result;
-                        var success = string.Equals(packet.payload?.Trim() ?? string.Empty, _password);
+                        var success = !string.IsNullOrWhiteSpace(_password)
+                            && string.Equals(packet.payload ?? string.Empty, _password);
                         if (success)
                         {
                             peer.SetAuthentificated(true);

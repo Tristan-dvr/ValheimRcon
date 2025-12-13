@@ -54,10 +54,10 @@ namespace ValheimRcon
         {
             Log.CreateInstance(Logger);
 
-            Port = Config.Bind("1. Rcon", "Port", 2458, "Port to receive RCON commands");
-            Password = Config.Bind("1. Rcon", "Password", System.Guid.NewGuid().ToString(), "Password for RCON packages validation");
-            WhiteListConfig = Config.Bind("1. Rcon", "Whitelist IP mask", "", "Comma-separated list of IP addresses or masks (e.g., 192.168.1.0/24, 10.0.0.1). If not empty, only these IPs are allowed.");
-            BlackListConfig = Config.Bind("1. Rcon", "Blacklist IP mask", "", "Comma-separated list of IP addresses or masks (e.g., 192.168.1.0/24, 10.0.0.1). Blocked IPs when whitelist is empty.");
+            Port = Config.Bind("1. Rcon", "Port", 2458, "Port to receive RCON commands. [Server restart required for update]");
+            Password = Config.Bind("1. Rcon", "Password", "", "Password for RCON packages validation. Empty password means plugin will not work! [Server restart required for update]");
+            WhiteListConfig = Config.Bind("1. Rcon", "Whitelist IP mask", "", "Comma-separated list of IP addresses or masks (e.g., 192.168.1.0/24, 10.0.0.1)");
+            BlackListConfig = Config.Bind("1. Rcon", "Blacklist IP mask", "", "Comma-separated list of IP addresses or masks (e.g., 192.168.1.0/24, 10.0.0.1)");
             DiscordUrl = Config.Bind("2. Discord", "Webhook url", "", "Discord webhook for sending command results");
             ServerChatName = Config.Bind("3. Chat", "Server name", "Server", "Name of server to display messages sent with rcon command");
 
@@ -75,9 +75,15 @@ namespace ValheimRcon
             RconProxy.Instance.OnCommandCompleted += SendResultToDiscord;
             RconProxy.Instance.OnSecurityReport += SendReportToDiscord;
 
-            RconCommandsUtil.RegisterAllCommands(Assembly.GetExecutingAssembly());
-
             Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
+
+            if (string.IsNullOrWhiteSpace(Password.Value))
+            {
+                Log.Error($"Password is empty. Plugin will not work. Please, provide a secure password in config and restart the server.");
+                return;
+            }
+
+            RconCommandsUtil.RegisterAllCommands(Assembly.GetExecutingAssembly());
         }
 
         private void OnDestroy()
