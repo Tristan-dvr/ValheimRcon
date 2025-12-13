@@ -79,7 +79,7 @@ namespace ValheimRcon
 
             if (string.IsNullOrWhiteSpace(Password.Value))
             {
-                Log.Error($"Password is empty. Plugin will not work. Please, provide a secure password in config and restart the server.");
+                Log.Error($"Password is empty. Plugin will not work. Please configure a secure password and restart the server.");
                 return;
             }
 
@@ -99,7 +99,7 @@ namespace ValheimRcon
 
             var fullCommand = $"{command} {string.Join(" ", args)}";
             _builder.Clear();
-            _builder.AppendLine($"> {peer.Endpoint} -> {fullCommand}");
+            _builder.AppendLine($"> {peer.Address} -> {fullCommand}");
 
             if (_builder.Length > MaxDiscordMessageLength)
             {
@@ -138,7 +138,7 @@ namespace ValheimRcon
             }
         }
 
-        private void SendReportToDiscord(string endPoint, string reason)
+        private void SendReportToDiscord(object endPoint, string reason)
         {
             var url = DiscordSecurityUrl.Value;
             if (string.IsNullOrEmpty(url))

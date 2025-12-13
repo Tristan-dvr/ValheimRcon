@@ -54,7 +54,7 @@ namespace ValheimRcon
             _receiver.Update();
         }
 
-        private void HandleSecurityReport(string endPoint, string reason) => OnSecurityReport?.Invoke(endPoint, reason);
+        private void HandleSecurityReport(object endPoint, string reason) => OnSecurityReport?.Invoke(endPoint, reason);
 
         public void RegisterCommand<T>() where T : IRconCommand => RegisterCommand(typeof(T));
 

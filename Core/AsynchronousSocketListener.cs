@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 
 namespace ValheimRcon.Core
 {
@@ -17,7 +18,6 @@ namespace ValheimRcon.Core
         private readonly Socket _listener;
         private readonly HashSet<IRconPeer> _clients = new HashSet<IRconPeer>();
         private readonly HashSet<IRconPeer> _waitingForDisconnect = new HashSet<IRconPeer>();
-        private readonly List<IRconPeer> _clientsSnapshot = new List<IRconPeer>();
         private readonly SecurityReportHandler _securityReportHandler;
         private readonly IpAddressFilter _filter;
         private bool _checkNewConnections;
@@ -63,13 +63,8 @@ namespace ValheimRcon.Core
         {
             TryAcceptNewClients();
 
-            // Create snapshot of clients for processing
-            _clientsSnapshot.Clear();
-            _clientsSnapshot.AddRange(_clients);
-
             var now = DateTime.Now;
-            // Process clients without holding the lock
-            foreach (var client in _clientsSnapshot)
+            foreach (var client in _clients)
             {
                 if (!client.IsConnected())
                 {
@@ -77,8 +72,14 @@ namespace ValheimRcon.Core
                 }
                 else if (!client.Authentificated && now > client.Created + UnauthorizedClientLifetime)
                 {
-                    Log.Warning($"Unauthorized timeout [{client.Endpoint}]");
-                    _securityReportHandler?.Invoke(client.Endpoint, "Unauthorized timeout.");
+                    Log.Warning($"Unauthorized timeout [{client.Address}]");
+                    _securityReportHandler?.Invoke(client.Address, "Unauthorized timeout.");
+                    Disconnect(client);
+                }
+                else if (!_filter.IsAllowed(client.Address))
+                {
+                    Log.Warning($"Disconnected by IP filter [{client.Address}]");
+                    _securityReportHandler?.Invoke(client.Address, "Disconnected by IP filter.");
                     Disconnect(client);
                 }
                 else if (client.TryReceive(out var packet, out var error))
@@ -87,7 +88,7 @@ namespace ValheimRcon.Core
                 }
                 else if (!string.IsNullOrEmpty(error))
                 {
-                    _securityReportHandler?.Invoke(client.Endpoint, error);
+                    _securityReportHandler?.Invoke(client.Address, error);
                     Disconnect(client);
                 }
             }
@@ -138,14 +139,13 @@ namespace ValheimRcon.Core
             }
         }
 
-
         private void OnClientConnected(Socket socket)
         {
             var remoteEndPoint = socket.RemoteEndPoint as IPEndPoint;
             if (remoteEndPoint == null)
             {
                 Log.Warning("Client connected with invalid endpoint");
-                _securityReportHandler?.Invoke(socket.RemoteEndPoint?.ToString(), "Rejected connection. Unknown endpoint.");
+                _securityReportHandler?.Invoke(socket.RemoteEndPoint, "Rejected connection. Unknown endpoint.");
                 socket.Close();
                 return;
             }
@@ -155,20 +155,20 @@ namespace ValheimRcon.Core
             if (!_filter.IsAllowed(clientAddress))
             {
                 Log.Warning($"Client connection rejected from [{remoteEndPoint}] - IP not allowed");
-                _securityReportHandler?.Invoke(remoteEndPoint.ToString(), "Rejected connection by IP filter.");
+                _securityReportHandler?.Invoke(clientAddress, "Rejected connection by IP filter.");
                 socket.Close();
                 return;
             }
 
             var state = new RconPeer(socket);
 
-            Log.Debug($"Client connected [{state.Endpoint}]");
+            Log.Debug($"Client connected [{state.Address}]");
             _clients.Add(state);
         }
 
         private void DisconnectPeer(IRconPeer peer)
         {
-            Log.Debug($"Client disconnected [{peer.Endpoint}]");
+            Log.Debug($"Client disconnected [{peer.Address}]");
             try
             {
                 peer.Dispose();

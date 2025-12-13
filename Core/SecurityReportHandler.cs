@@ -1,4 +1,6 @@
-﻿namespace ValheimRcon.Core
+﻿using System.Net;
+
+namespace ValheimRcon.Core
 {
-    public delegate void SecurityReportHandler(string endPoint, string reason);
+    public delegate void SecurityReportHandler(object endPoint, string reason);
 }

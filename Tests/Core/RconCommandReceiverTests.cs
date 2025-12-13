@@ -2,6 +2,7 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using ValheimRcon.Core;
 
@@ -406,7 +407,7 @@ namespace ValheimRcon.Tests.Core
     public class MockRconPeer : IRconPeer
     {
         public bool Authentificated { get; private set; }
-        public string Endpoint { get; } = "127.0.0.1:12345";
+        public IPAddress Address { get; } = IPAddress.Parse("127.0.0.1");
         public DateTime Created { get; } = DateTime.Now;
         public List<RconPacket> SentPackets { get; } = new List<RconPacket>();
 

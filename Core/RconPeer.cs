@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
@@ -11,25 +12,29 @@ namespace ValheimRcon.Core
         private bool _disposed = false;
         private readonly byte[] _buffer = new byte[BufferSize];
         private readonly Socket _socket;
+        private readonly IPAddress _address;
 
         public DateTime Created { get; }
         public bool Authentificated { get; private set; }
-        public string Endpoint 
+        public IPAddress Address 
         { 
             get 
             { 
                 if (_disposed)
-                    return "unknown";
-                    
-                try 
-                { 
-                    return _socket?.RemoteEndPoint?.ToString() ?? string.Empty; 
-                } 
-                catch 
-                { 
-                    return "unknown"; 
-                } 
-            } 
+                    return null;
+
+                return _address;
+            }
+        }
+
+        public RconPeer(Socket workSocket)
+        {
+            if (workSocket == null)
+                throw new ArgumentNullException(nameof(workSocket));
+
+            _socket = workSocket;
+            _address = (_socket.RemoteEndPoint as IPEndPoint).Address;
+            Created = DateTime.Now;
         }
 
         public async Task SendAsync(RconPacket packet)
@@ -48,7 +53,7 @@ namespace ValheimRcon.Core
 
             var byteData = packet.Serialize();
             var bytesSent = await _socket.SendAsync(new ArraySegment<byte>(byteData), SocketFlags.None);
-            Log.Debug($"Sent {bytesSent} bytes to client [{Endpoint}]");
+            Log.Debug($"Sent {bytesSent} bytes to client [{Address}]");
         }
 
         public bool IsConnected()
@@ -74,7 +79,7 @@ namespace ValheimRcon.Core
                 if (availableBytes > _buffer.Length)
                 {
                     error = $"Available data exceeds buffer size: {availableBytes} > {_buffer.Length}";
-                    Log.Warning($"{error} [{Endpoint}]");
+                    Log.Warning($"{error} [{Address}]");
                     return false;
                 }
 
@@ -85,12 +90,12 @@ namespace ValheimRcon.Core
                 try
                 {
                     packet = new RconPacket(_buffer);
-                    Log.Debug($"Received package {packet} from [{Endpoint}]");
+                    Log.Debug($"Received package {packet} from [{Address}]");
                     return true;
                 }
                 catch (Exception e)
                 {
-                    Log.Warning($"Failed to parse packet from [{Endpoint}]: {e.Message}");
+                    Log.Warning($"Failed to parse packet from [{Address}]: {e.Message}");
                     error = e.Message;
                     return false;
                 }
@@ -100,15 +105,6 @@ namespace ValheimRcon.Core
                 }
             }
             return false;
-        }
-
-        public RconPeer(Socket workSocket)
-        {
-            if (workSocket == null)
-                throw new ArgumentNullException(nameof(workSocket));
-            
-            _socket = workSocket;
-            Created = DateTime.Now;
         }
 
         public void SetAuthentificated(bool authentificated) => Authentificated = authentificated;
