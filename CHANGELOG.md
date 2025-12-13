@@ -1,3 +1,14 @@
+### 1.5.0
+- Added security improvements:
+	- IP address filtering with CIDR mask support (whitelist/blacklist)
+		- Configure allowed/blocked IP addresses or IP ranges using CIDR notation
+		- Whitelist: if empty, all IPs allowed (except blacklisted)
+		- Blacklist: always blocks specified IPs/ranges (takes priority over whitelist)
+	- Security incident logging to Discord
+		- Reports failed login attempts, unauthorized access, IP filter rejections, and other security events
+		- Configurable webhook URL and message prefix for security reports
+	- Empty password protection: plugin is disabled if password is empty to prevent insecure configurations
+
 ### 1.4.1
 - Added container inventory management commands:
   - `showContainer <id:userid>` - display inventory contents with item indices `[index]` for each item
