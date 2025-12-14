@@ -85,6 +85,9 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore ${{ steps.find-project.outputs.project-path }}
 
+    - name: Restore NuGet packages
+      run: nuget restore ${{ steps.find-project.outputs.project-path }}
+
     - name: Build project
       run: dotnet build ${{ steps.find-project.outputs.project-path }} --configuration Release --no-restore
 
