@@ -86,7 +86,7 @@ jobs:
       run: dotnet restore ${{ steps.find-project.outputs.project-path }}
 
     - name: Restore NuGet packages
-      run: nuget restore ${{ steps.find-project.outputs.project-path }}
+      run: nuget restore ${{ steps.find-project.outputs.project-path }} -SolutionDirectory .
 
     - name: Build project
       run: dotnet build ${{ steps.find-project.outputs.project-path }} --configuration Release --no-restore
