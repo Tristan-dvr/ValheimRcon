@@ -152,6 +152,7 @@
     <Compile Include="FormattingUtils.cs" />
     <Compile Include="Core\IpAddressFilter.cs" />
     <Compile Include="Helper.cs" />
+    <Compile Include="Core\Incident.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="PlayerUtils.cs" />
     <Compile Include="Plugin.cs" />

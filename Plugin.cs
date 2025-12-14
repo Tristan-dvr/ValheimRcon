@@ -30,14 +30,13 @@ namespace ValheimRcon
         public static ConfigEntry<string> Password;
         public static ConfigEntry<int> Port;
         public static ConfigEntry<string> ServerChatName;
-        public static IReadOnlyCollection<IPNetwork> WhiteList;
-        public static IReadOnlyCollection<IPNetwork> BlackList;
 
         private static ConfigEntry<string> WhiteListConfig;
         private static ConfigEntry<string> BlackListConfig;
 
-        public static ConfigEntry<string> DiscordSecurityUrl;
-        public static ConfigEntry<string> DiscordSecurityReportPrefix;
+        private static ConfigEntry<string> DiscordSecurityUrl;
+        private static ConfigEntry<string> DiscordSecurityReportPrefix;
+        private static ConfigEntry<Incident> LogIncidents;
 
         private DiscordService _discordService;
         private StringBuilder _builder = new StringBuilder();
@@ -63,6 +62,8 @@ namespace ValheimRcon
 
             DiscordSecurityReportPrefix = Config.Bind("4. Security", "Message prefix", "@here Security alert", "Prefix attached to every security report");
             DiscordSecurityUrl = Config.Bind("4. Security", "Webhook url", "", "Discord webhook for sending security reports");
+            LogIncidents = Config.Bind("4. Security", "Incidents",
+                Incident.UnauthorizedAccess | Incident.UnexpectedBehaviour, "Incident types will be reported to discord");
 
             CommandsUserInfo.Name = ServerChatName.Value;
 
@@ -138,8 +139,11 @@ namespace ValheimRcon
             }
         }
 
-        private void SendReportToDiscord(object endPoint, string reason)
+        private void SendReportToDiscord(object endPoint, Incident incident, string reason)
         {
+            if (!LogIncidents.Value.HasFlag(incident))
+                return;
+
             var url = DiscordSecurityUrl.Value;
             if (string.IsNullOrEmpty(url))
                 return;

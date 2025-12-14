@@ -46,8 +46,8 @@ namespace ValheimRcon.Core
                     {
                         if (peer.Authentificated)
                         {
-                            Log.Error($"Already authorized [{peer.Address}]");
-                            _securityReportHandler?.Invoke(peer.Address, "Already authorized.");
+                            Log.Warning($"Already authorized [{peer.Address}]");
+                            _securityReportHandler?.Invoke(peer.Address, Incident.UnexpectedBehaviour, "Already authorized.");
 
                             await peer.SendAsync(new RconPacket(packet.requestId, PacketType.Command, "Already authorized"));
                             _manager.Disconnect(peer);
@@ -72,7 +72,7 @@ namespace ValheimRcon.Core
 
                         if (!success)
                         {
-                            _securityReportHandler?.Invoke(peer.Address, "Login failed.");
+                            _securityReportHandler?.Invoke(peer.Address, Incident.UnauthorizedAccess, "Login failed.");
                             _manager.Disconnect(peer);
                         }
                         break;
@@ -81,8 +81,8 @@ namespace ValheimRcon.Core
                     {
                         if (!peer.Authentificated)
                         {
-                            Log.Warning($"Not authorized [{peer.Address}]");
-                            _securityReportHandler?.Invoke(peer.Address, "Unauthorized.");
+                            Log.Warning($"Unauthorized access attempt [{peer.Address}]");
+                            _securityReportHandler?.Invoke(peer.Address, Incident.UnauthorizedAccess, "Unauthorized access attempt.");
 
                             await peer.SendAsync(new RconPacket(packet.requestId, packet.type, "Unauthorized"));
                             _manager.Disconnect(peer);
@@ -115,8 +115,8 @@ namespace ValheimRcon.Core
                         break;
                     }
                 default:
-                    Log.Error($"Unknown packet type: {packet} [{peer.Address}]");
-                    _securityReportHandler?.Invoke(peer.Address, $"Unknown packet type {packet}.");
+                    Log.Warning($"Unknown packet type: {packet} [{peer.Address}]");
+                    _securityReportHandler?.Invoke(peer.Address, Incident.UnexpectedBehaviour, $"Unknown packet type {packet}.");
 
                     await peer.SendAsync(new RconPacket(packet.requestId, PacketType.Error, "Cannot handle command"));
                     _manager.Disconnect(peer);

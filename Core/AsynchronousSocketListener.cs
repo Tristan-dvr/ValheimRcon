@@ -73,13 +73,13 @@ namespace ValheimRcon.Core
                 else if (!client.Authentificated && now > client.Created + UnauthorizedClientLifetime)
                 {
                     Log.Warning($"Unauthorized timeout [{client.Address}]");
-                    _securityReportHandler?.Invoke(client.Address, "Unauthorized timeout.");
+                    _securityReportHandler?.Invoke(client.Address, Incident.UnexpectedBehaviour, "Unauthorized timeout.");
                     Disconnect(client);
                 }
                 else if (!_filter.IsAllowed(client.Address))
                 {
                     Log.Warning($"Disconnected by IP filter [{client.Address}]");
-                    _securityReportHandler?.Invoke(client.Address, "Disconnected by IP filter.");
+                    _securityReportHandler?.Invoke(client.Address, Incident.IpFilter, "Disconnected by IP filter.");
                     Disconnect(client);
                 }
                 else if (client.TryReceive(out var packet, out var error))
@@ -88,7 +88,7 @@ namespace ValheimRcon.Core
                 }
                 else if (!string.IsNullOrEmpty(error))
                 {
-                    _securityReportHandler?.Invoke(client.Address, error);
+                    _securityReportHandler?.Invoke(client.Address, Incident.UnexpectedBehaviour, error);
                     Disconnect(client);
                 }
             }
@@ -145,7 +145,7 @@ namespace ValheimRcon.Core
             if (remoteEndPoint == null)
             {
                 Log.Warning("Client connected with invalid endpoint");
-                _securityReportHandler?.Invoke(socket.RemoteEndPoint, "Rejected connection. Unknown endpoint.");
+                _securityReportHandler?.Invoke(socket.RemoteEndPoint, Incident.IpFilter, "Rejected connection. Unknown endpoint.");
                 socket.Close();
                 return;
             }
@@ -155,7 +155,7 @@ namespace ValheimRcon.Core
             if (!_filter.IsAllowed(clientAddress))
             {
                 Log.Warning($"Client connection rejected from [{remoteEndPoint}] - IP not allowed");
-                _securityReportHandler?.Invoke(clientAddress, "Rejected connection by IP filter.");
+                _securityReportHandler?.Invoke(clientAddress, Incident.IpFilter, "Rejected connection by IP filter.");
                 socket.Close();
                 return;
             }
