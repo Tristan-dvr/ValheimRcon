@@ -123,6 +123,7 @@ jobs:
         Copy-Item "icon.png" "package\"
         Copy-Item "README.md" "package\"
         Copy-Item "CHANGELOG.md" "package\"
+        Copy-Item "THIRD-PARTY-NOTICES.txt" "package\"
         
         # Create zip archive
         Compress-Archive -Path "package\*" -DestinationPath $zipName -Force
