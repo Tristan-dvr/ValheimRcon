@@ -17,7 +17,7 @@ namespace ValheimRcon.Commands.Container
             }
 
             var prefabHash = zdo.GetPrefab();
-            var prefabName = ZdoUtils.GetPrefabName(prefabHash);
+            var prefabName = zdo.GetPrefabName();
             var prefab = ZNetScene.instance.GetPrefab(prefabHash);
             
             if (prefab == null)

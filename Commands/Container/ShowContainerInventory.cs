@@ -1,4 +1,5 @@
 using System.Text;
+using ValheimRcon.ZDOInfo;
 
 namespace ValheimRcon.Commands.Container
 {
@@ -17,8 +18,7 @@ namespace ValheimRcon.Commands.Container
             }
 
             var sb = new StringBuilder();
-            sb.AppendFormat("Prefab: {0}", prefabName);
-            ZdoUtils.AppendZdoStats(zdo, sb);
+            ZDOInfoUtil.AppendInfo(zdo, sb);
             sb.AppendLine();
             sb.AppendFormat("Items ({0}):", inventory.NrOfItems());
 

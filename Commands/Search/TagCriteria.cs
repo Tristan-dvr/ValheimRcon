@@ -9,7 +9,7 @@ namespace ValheimRcon.Commands.Search
             _tag = tag;
         }
 
-        public bool IsMatch(ZDO zdo) => ZdoUtils.GetTag(zdo) == _tag;
+        public bool IsMatch(ZDO zdo) => zdo.GetTag() == _tag;
     }
 }
 

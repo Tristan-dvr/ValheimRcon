@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Pool;
+using ValheimRcon.ZDOInfo;
 using Object = UnityEngine.Object;
 
 namespace ValheimRcon.Commands.Players
@@ -108,7 +109,7 @@ namespace ValheimRcon.Commands.Players
                 count -= stackSize;
 
                 sb.Append('-');
-                ZdoUtils.AppendZdoStats(dropped.m_nview.GetZDO(), sb);
+                ZDOInfoUtil.AppendInfo(dropped.m_nview.GetZDO(), sb);
                 sb.AppendLine();
             }
             ZNetView.FinishGhostInit();

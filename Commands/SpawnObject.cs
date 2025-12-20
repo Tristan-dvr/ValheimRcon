@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using ValheimRcon.ZDOInfo;
 
 namespace ValheimRcon.Commands
 {
@@ -102,8 +103,8 @@ namespace ValheimRcon.Commands
             sb.AppendLine($"Spawned {count} objects:");
             foreach (var zdo in createdObjects)
             {
-                sb.Append($"- Prefab: {ZdoUtils.GetPrefabName(zdo.GetPrefab())}");
-                ZdoUtils.AppendZdoStats(zdo, sb);
+                sb.Append('-');
+                ZDOInfoUtil.AppendInfo(zdo, sb);
                 sb.AppendLine();
             }
             return sb.ToString().TrimEnd();

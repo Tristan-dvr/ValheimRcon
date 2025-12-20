@@ -160,6 +160,21 @@
     <Compile Include="RconCommandsUtil.cs" />
     <Compile Include="RconProxy.cs" />
     <Compile Include="ThreadingUtil.cs" />
+    <Compile Include="ZDOInfo\CommonZDOInfoProvider.cs" />
+    <Compile Include="ZDOInfo\BedZDOInfoProvider.cs" />
+    <Compile Include="ZDOInfo\BuildingZDOInfoProvider.cs" />
+    <Compile Include="ZDOInfo\CharacterZDOInfoProvider.cs" />
+    <Compile Include="ZDOInfo\ContainerZDOInfoProvider.cs" />
+    <Compile Include="ZDOInfo\GuardStoneZDOInfoProvider.cs" />
+    <Compile Include="ZDOInfo\ItemDropZDOInfoProvider.cs" />
+    <Compile Include="ZDOInfo\ArmorStandZDOInfoProvider.cs" />
+    <Compile Include="ZDOInfo\ItemStandZDOInfoProvider.cs" />
+    <Compile Include="ZDOInfo\IZDOInfoProvider.cs" />
+    <Compile Include="ZDOInfo\PortalZDOInfoProvider.cs" />
+    <Compile Include="ZDOInfo\SignZDOInfoProvider.cs" />
+    <Compile Include="ZDOInfo\TombStoneZDOInfoProvider.cs" />
+    <Compile Include="ZDOInfo\ZDOInfoProviderBase.cs" />
+    <Compile Include="ZDOInfo\ZDOInfoUtil.cs" />
     <Compile Include="ZdoUtils.cs" />
   </ItemGroup>
   <ItemGroup>

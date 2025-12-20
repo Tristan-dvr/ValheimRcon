@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using ValheimRcon.Commands.Search;
+using ValheimRcon.ZDOInfo;
 
 namespace ValheimRcon.Commands
 {
@@ -70,9 +71,8 @@ namespace ValheimRcon.Commands
             sb.AppendLine($"Found {objects.Length} objects:");
             foreach (var zdo in objects)
             {
-                var prefabName = ZdoUtils.GetPrefabName(zdo.GetPrefab());
-                sb.Append($"- Prefab: {prefabName}");
-                ZdoUtils.AppendZdoStats(zdo, sb);
+                sb.Append('-');
+                ZDOInfoUtil.AppendInfo(zdo, sb);
                 sb.AppendLine();
             }
             return sb.ToString().TrimEnd();

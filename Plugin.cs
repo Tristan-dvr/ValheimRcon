@@ -1,12 +1,10 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
-using LukeSkywalker.IPNetwork;
 using Splatform;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
@@ -21,7 +19,7 @@ namespace ValheimRcon
     {
         public const string Guid = "org.tristan.rcon";
         public const string Name = "Valheim Rcon";
-        public const string Version = "1.5.0";
+        public const string Version = "1.5.1";
 
         private const int MaxDiscordMessageLength = 1900;
         private const int TruncatedMessageLength = 200;

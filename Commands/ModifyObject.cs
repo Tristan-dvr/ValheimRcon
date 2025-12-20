@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using ValheimRcon.Commands.Modification;
 using ValheimRcon.Commands.Search;
+using ValheimRcon.ZDOInfo;
 
 namespace ValheimRcon.Commands
 {
@@ -91,8 +92,7 @@ namespace ValheimRcon.Commands
 
             builder.Clear();
             builder.AppendLine("Object modified successfully");
-            builder.Append("Prefab: ").Append(zdo.GetPrefabName());
-            ZdoUtils.AppendZdoStats(zdo, builder);
+            ZDOInfoUtil.AppendInfo(zdo, builder);
             return builder.ToString().TrimEnd();
         }
     }
