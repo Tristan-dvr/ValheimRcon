@@ -17,6 +17,8 @@ namespace ValheimRcon
     [BepInPlugin(Guid, Name, Version)]
     public class Plugin : BaseUnityPlugin
     {
+        private const long MaxDiscordPayloadSize = 10L * 1024 * 1024; // 10mb
+
         public const string Guid = "org.tristan.rcon";
         public const string Name = "Valheim Rcon";
         public const string Version = "1.5.1";
@@ -38,6 +40,7 @@ namespace ValheimRcon
 
         private DiscordService _discordService;
         private StringBuilder _builder = new StringBuilder();
+        private string _cacheFilesFolder;
 
         public static readonly UserInfo CommandsUserInfo = new UserInfo
         {
@@ -64,6 +67,9 @@ namespace ValheimRcon
                 Incident.UnauthorizedAccess | Incident.UnexpectedBehaviour, "Incident types will be reported to discord");
 
             CommandsUserInfo.Name = ServerChatName.Value;
+
+            _cacheFilesFolder = Path.Combine(Paths.CachePath, Name);
+            ClearCacheDirectory(_cacheFilesFolder);
 
             _discordService = new DiscordService();
 
@@ -120,13 +126,31 @@ namespace ValheimRcon
                     _builder.ToString(),
                     result.AttachedFilePath);
 
-                var tempFilePath = Path.Combine(Paths.CachePath, $"{DateTime.UtcNow.Ticks}.txt");
+                var tempFilePath = Path.Combine(_cacheFilesFolder, $"{DateTime.UtcNow.Ticks}.txt");
+
                 FileHelpers.EnsureDirectoryExists(tempFilePath);
                 File.WriteAllText(tempFilePath, result.Text);
 
-                _discordService.SendResult(url,
-                    "**Full message**",
-                    tempFilePath);
+                var file = new FileInfo(tempFilePath);
+                Log.Debug($"Saved full result {tempFilePath}. Size {file.Length / 1024f}kb");
+                if (file.Length > MaxDiscordPayloadSize)
+                {
+                    var filePath = Path.Combine(Utils.GetSaveDataPath(FileHelpers.FileSource.Local),
+                        Name,
+                        string.Format("{0}_{1:yyyy_MM_dd_HH_mm_ss}.txt", command, DateTime.UtcNow));
+                    FileHelpers.EnsureDirectoryExists(filePath);
+                    File.Copy(tempFilePath, filePath, true);
+
+                    var message = $"The result is too long to send to Discord. It has been saved on the server: `{filePath}`";
+                    _discordService.SendResult(url, message, "");
+                    Log.Message(message);
+                }
+                else
+                {
+                    _discordService.SendResult(url,
+                        "**Full message**",
+                        tempFilePath);
+                }
             }
             else
             {
@@ -169,6 +193,17 @@ namespace ValheimRcon
         private static IEnumerable<string> ParseList(string config)
         {
             return config.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        private static void ClearCacheDirectory(string cacheDirectory)
+        {
+            if (!Directory.Exists(cacheDirectory))
+                return;
+
+            var directory = new DirectoryInfo(cacheDirectory);
+            Log.Info($"Clearing cache. Files {directory.GetFiles().Length}, directories {directory.GetDirectories().Length}");
+
+            Directory.Delete(cacheDirectory, true);
         }
 
         [HarmonyPatch]
