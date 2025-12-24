@@ -22,14 +22,19 @@ namespace ValheimRcon.ZDOInfo
             new PortalZDOInfoProvider(),
         };
 
-        public static void AppendInfo(ZDO zdo, StringBuilder stringBuilder)
+        public static void AppendInfo(ZDO zdo, StringBuilder stringBuilder, bool detailed = true)
         {
+            var hasAny = false;
             foreach (var provider in infoProviders)
             {
                 if (!provider.IsAvailableTo(zdo))
                     continue;
 
-                provider.AppendInfo(zdo, stringBuilder);
+                if (hasAny)
+                    stringBuilder.Append(' ');
+
+                provider.AppendInfo(zdo, stringBuilder, detailed);
+                hasAny = true;
             }
 
             if (!zdo.Persistent)
@@ -40,7 +45,7 @@ namespace ValheimRcon.ZDOInfo
 
         public static void AppendItemInfo(ItemData item, StringBuilder stringBuilder)
         {
-            stringBuilder.AppendFormat(" Stack: {0}", item.m_stack);
+            stringBuilder.AppendFormat("Stack: {0}", item.m_stack);
             stringBuilder.AppendFormat(" Quality: {0}", item.m_quality);
 
             if (item.m_variant != 0)

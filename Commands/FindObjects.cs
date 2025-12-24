@@ -17,17 +17,17 @@ namespace ValheimRcon.Commands
             "-creator <creator id> " +
             "-id <id:userid> " +
             "-tag <tag> " +
-            "-tag-old <tag>";
+            "-tag-old <tag> " +
+            "-detailed";
 
         private readonly List<ISearchCriteria> _criterias = new List<ISearchCriteria>();
 
         protected override string OnHandle(CommandArgs args)
         {
-            var optionalArgs = args.GetOptionalArguments();
             _criterias.Clear();
-            foreach (var index in optionalArgs)
+            var detailed = false;
+            foreach (var (index, argument) in args.GetOptionalArguments())
             {
-                var argument = args.GetString(index);
                 switch (argument.ToLower())
                 {
                     case "-prefab":
@@ -47,6 +47,9 @@ namespace ValheimRcon.Commands
                         break;
                     case "-tag-old":
                         _criterias.Add(new OldTagCriteria(args.GetString(index + 1)));
+                        break;
+                    case "-detailed":
+                        detailed = true;
                         break;
                     default:
                         return $"Unknown argument: {argument}";
@@ -72,7 +75,7 @@ namespace ValheimRcon.Commands
             foreach (var zdo in objects)
             {
                 sb.Append('-');
-                ZDOInfoUtil.AppendInfo(zdo, sb);
+                ZDOInfoUtil.AppendInfo(zdo, sb, detailed);
                 sb.AppendLine();
             }
             return sb.ToString().TrimEnd();

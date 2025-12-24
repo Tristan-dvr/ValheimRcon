@@ -31,10 +31,9 @@ namespace ValheimRcon.Commands
             float radius = 0f;
             bool tamed = false;
 
-            foreach (var index in args.GetOptionalArguments())
+            foreach (var (index, argument) in args.GetOptionalArguments())
             {
-                var argument = args.GetString(index);
-                switch (argument.ToLower())
+                switch (argument)
                 {
                     case "-level":
                     case "-l":

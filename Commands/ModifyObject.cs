@@ -42,9 +42,9 @@ namespace ValheimRcon.Commands
             var optionalArgs = args.GetOptionalArguments();
             var force = false;
             _modifications.Clear();
-            foreach (var index in optionalArgs)
+            foreach (var (index, argument) in optionalArgs)
             {
-                switch (args.GetString(index))
+                switch (argument)
                 {
                     case "-position":
                         _modifications.Add(new PositionModification(args.GetVector3(index + 1)));

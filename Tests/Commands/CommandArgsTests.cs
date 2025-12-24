@@ -303,7 +303,7 @@ namespace ValheimRcon.Tests.Commands
 
             var result = commandArgs.GetOptionalArguments();
 
-            var indices = result.ToList();
+            var indices = result.Select((_, arg) => arg).ToList();
             Assert.AreEqual(expectedIndices.Length, indices.Count);
             for (int i = 0; i < expectedIndices.Length; i++)
             {

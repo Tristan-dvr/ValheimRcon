@@ -20,7 +20,7 @@
                 },
             };
             peer.InvokeRoutedRpcToZdo("RPC_Damage", hitData);
-            return $"{peer.GetPlayerInfo()} damaged to {hitData.m_damage.m_damage.ToDisplayFormat()}hp";
+            return $"{peer.GetPlayerInfo()} took {hitData.m_damage.m_damage.ToDisplayFormat()}hp damage";
         }
     }
 }

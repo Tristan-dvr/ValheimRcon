@@ -6,9 +6,9 @@ namespace ValheimRcon.ZDOInfo
 {
     internal class GuardStoneZDOInfoProvider : ZDOInfoProviderBase<PrivateArea>
     {
-        public override void AppendInfo(ZDO zdo, StringBuilder stringBuilder)
+        public override void AppendInfo(ZDO zdo, StringBuilder stringBuilder, bool detailed)
         {
-            stringBuilder.Append($" Enabled: {zdo.GetBool(ZDOVars.s_enabled)}");
+            stringBuilder.Append($"Enabled: {zdo.GetBool(ZDOVars.s_enabled)}");
             stringBuilder.Append($" Owner: {zdo.GetString(ZDOVars.s_creatorName)}");
             stringBuilder.Append($" Permitted:");
 

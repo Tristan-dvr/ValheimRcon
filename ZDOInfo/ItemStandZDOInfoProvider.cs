@@ -6,10 +6,10 @@ namespace ValheimRcon.ZDOInfo
     {
         private readonly ItemDrop.ItemData _tempData = new ItemDrop.ItemData();
 
-        public override void AppendInfo(ZDO zdo, StringBuilder stringBuilder)
+        public override void AppendInfo(ZDO zdo, StringBuilder stringBuilder, bool detailed)
         {
             var item = zdo.GetString(ZDOVars.s_item);
-            stringBuilder.AppendFormat(" Attached items:");
+            stringBuilder.AppendFormat(" Attached item: ");
             if (string.IsNullOrEmpty(item))
             {
                 stringBuilder.Append("<empty>");
@@ -17,8 +17,12 @@ namespace ValheimRcon.ZDOInfo
             }
 
             stringBuilder.Append(item);
-            ItemDrop.LoadFromZDO(_tempData, zdo);
-            ZDOInfoUtil.AppendItemInfo(_tempData, stringBuilder);
+            if (detailed)
+            {
+                stringBuilder.Append(' ');
+                ItemDrop.LoadFromZDO(_tempData, zdo);
+                ZDOInfoUtil.AppendItemInfo(_tempData, stringBuilder);
+            }
         }
     }
 }

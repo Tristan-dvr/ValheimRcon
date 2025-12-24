@@ -10,7 +10,7 @@
         {
             var value = args.GetFloat(1);
             peer.InvokeRoutedRpcToZdo("RPC_Heal", value, true);
-            return $"{peer.GetPlayerInfo()} healed to {value.ToDisplayFormat()}hp";
+            return $"{peer.GetPlayerInfo()} received {value.ToDisplayFormat()}hp of healing";
         }
     }
 }

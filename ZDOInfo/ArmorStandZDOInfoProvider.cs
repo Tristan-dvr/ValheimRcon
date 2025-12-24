@@ -8,9 +8,9 @@ namespace ValheimRcon.ZDOInfo
         private readonly Dictionary<int, int> _itemStandSlots = new Dictionary<int, int>();
         private readonly ItemDrop.ItemData _tempData = new ItemDrop.ItemData();
 
-        public void AppendInfo(ZDO zdo, StringBuilder stringBuilder)
+        public void AppendInfo(ZDO zdo, StringBuilder stringBuilder, bool detailed = true)
         {
-            stringBuilder.AppendFormat(" Pose: {0}", zdo.GetInt(ZDOVars.s_pose));
+            stringBuilder.AppendFormat("Pose: {0}", zdo.GetInt(ZDOVars.s_pose));
             stringBuilder.AppendFormat(" Attached items: ");
 
             var count = _itemStandSlots[zdo.GetPrefab()];
@@ -21,13 +21,23 @@ namespace ValheimRcon.ZDOInfo
                 if (string.IsNullOrEmpty(item))
                     continue;
 
-                ItemDrop.LoadFromZDO(i, _tempData, zdo);
+                if (hasAny)
+                    stringBuilder.Append(',');
 
-                stringBuilder.AppendFormat("( {0}", item);
-                ZDOInfoUtil.AppendItemInfo(_tempData, stringBuilder);
-                stringBuilder.Append(") ");
+                if (detailed)
+                {
+                    ItemDrop.LoadFromZDO(i, _tempData, zdo);
 
-                hasAny = true;
+                    stringBuilder.AppendFormat("( {0} ", item);
+                    ZDOInfoUtil.AppendItemInfo(_tempData, stringBuilder);
+                    stringBuilder.Append(')');
+                }
+                else
+                {
+                    stringBuilder.Append(item);
+                }
+
+                    hasAny = true;
             }
 
             if (!hasAny)

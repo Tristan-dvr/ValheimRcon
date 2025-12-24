@@ -39,10 +39,9 @@ namespace ValheimRcon.Commands.Container
             float? durabilityOverride = null;
 
             var optionalArgs = args.GetOptionalArguments();
-            foreach (var index in optionalArgs)
+            foreach (var (index, argument) in optionalArgs)
             {
-                var arg = args.GetString(index);
-                switch (arg)
+                switch (argument)
                 {
                     case "-count":
                         count = args.GetInt(index + 1);
@@ -78,7 +77,7 @@ namespace ValheimRcon.Commands.Container
                         force = true;
                         break;
                     default:
-                        return $"Unknown argument: {arg}";
+                        return $"Unknown argument: {argument}";
                 }
             }
 

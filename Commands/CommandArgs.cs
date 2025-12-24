@@ -106,13 +106,13 @@ namespace ValheimRcon.Commands
             return index >= 0 && index < Arguments.Count;
         }
 
-        public IEnumerable<int> GetOptionalArguments()
+        public IEnumerable<(int Index, string Argument)> GetOptionalArguments()
         {
             for (int i = 0; i < Arguments.Count; i++)
             {
                 if (OptionalArgumentRegex.IsMatch(Arguments[i]))
                 {
-                    yield return i;
+                    yield return (i, Arguments[i]);
                 }
             }
         }

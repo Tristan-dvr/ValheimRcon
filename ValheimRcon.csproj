@@ -80,7 +80,6 @@
     <Compile Include="Commands\GlobalKeys\AddGlobalKeyCommand.cs" />
     <Compile Include="Commands\Admin\AddPermitted.cs" />
     <Compile Include="Commands\Admin\Ban.cs" />
-    <Compile Include="Commands\Admin\BanSteamId.cs" />
     <Compile Include="Commands\CommandArgs.cs" />
     <Compile Include="Commands\CommandArgsExtensions.cs" />
     <Compile Include="Commands\CommandResult.cs" />

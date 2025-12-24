@@ -9,12 +9,16 @@ namespace ValheimRcon.ZDOInfo
         private readonly Dictionary<int, float> _maxHealth = new Dictionary<int, float>();
         private readonly Dictionary<int, float> _maxSupport = new Dictionary<int, float>();
 
-        public void AppendInfo(ZDO zdo, StringBuilder stringBuilder)
+        public void AppendInfo(ZDO zdo, StringBuilder stringBuilder, bool detailed)
         {
-            stringBuilder.Append($" Creator: {zdo.GetLong(ZDOVars.s_creator)}");
+            stringBuilder.Append($"Creator: {zdo.GetLong(ZDOVars.s_creator)}");
             var maxHealth = _maxHealth.TryGetValue(zdo.GetPrefab(), out var health) ? health : 0f;
-            var maxSupport = _maxSupport.TryGetValue(zdo.GetPrefab(), out var support) ? support : 0f;
             stringBuilder.Append($" Health: {zdo.GetFloat(ZDOVars.s_health, maxHealth).ToDisplayFormat()}");
+
+            if (!detailed)
+                return;
+
+            var maxSupport = _maxSupport.TryGetValue(zdo.GetPrefab(), out var support) ? support : 0f;
             stringBuilder.Append($" Support: {zdo.GetFloat(ZDOVars.s_support, maxSupport).ToDisplayFormat()}");
         }
 

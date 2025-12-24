@@ -4,12 +4,12 @@ namespace ValheimRcon.ZDOInfo
 {
     internal class PortalZDOInfoProvider : ZDOInfoProviderBase<TeleportWorld>
     {
-        public override void AppendInfo(ZDO zdo, StringBuilder stringBuilder)
+        public override void AppendInfo(ZDO zdo, StringBuilder stringBuilder, bool detailed)
         {
             var portalTag = zdo.GetString(ZDOVars.s_tag);
             var author = zdo.GetString(ZDOVars.s_tagauthor);
 
-            stringBuilder.AppendFormat(" Portal tag: {0} (author {1})", portalTag, author);
+            stringBuilder.AppendFormat("Portal tag: {0} (author {1})", portalTag, author);
         }
     }
 }

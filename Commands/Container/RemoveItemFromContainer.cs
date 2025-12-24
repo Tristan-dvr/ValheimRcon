@@ -15,15 +15,14 @@ namespace ValheimRcon.Commands.Container
 
         protected override string HandleInventory(CommandArgs args, ZDO zdo, Inventory inventory, string prefabName)
         {
-            var optionalArgs = args.GetOptionalArguments();
             var force = false;
             var count = 1;
             int? itemIndex = null;
             string itemName = null;
             
-            foreach (var index in optionalArgs)
+            foreach (var (index, argument) in args.GetOptionalArguments())
             {
-                switch (args.GetString(index))
+                switch (argument)
                 {
                     case "-index":
                         itemIndex = args.GetInt(index + 1);
@@ -39,6 +38,8 @@ namespace ValheimRcon.Commands.Container
                     case "-force":
                         force = true;
                         break;
+                    default:
+                        return $"Unknown argument {argument}";
                 }
             }
 

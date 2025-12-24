@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
+using UnityEngine;
 
 namespace ValheimRcon
 {
@@ -24,12 +26,19 @@ namespace ValheimRcon
         public static void WritePlayerInfo(this ZNetPeer peer, StringBuilder sb)
         {
             sb.AppendFormat("{0} Steam ID:{1}", peer.m_playerName, peer.GetSteamId());
-            sb.AppendFormat(" Position: {0}({1})", peer.GetRefPos().ToDisplayFormat(), ZoneSystem.GetZone(peer.GetRefPos()));
+            sb.AppendFormat(" Position: {0}", peer.GetRefPos().ToDisplayFormat());
+            sb.AppendFormat(" Zone: {0}", ZoneSystem.GetZone(peer.GetRefPos()).ToDisplayFormat());
             var zdo = peer.GetZDO();
             if (zdo != null)
             {
                 sb.AppendFormat(" Player ID:{0}", peer.GetPlayerId());
                 sb.AppendFormat(" HP:{0}/{1}", zdo.GetFloat(ZDOVars.s_health).ToDisplayFormat(), zdo.GetFloat(ZDOVars.s_maxHealth).ToDisplayFormat());
+            }
+            sb.AppendFormat(" Public position: {0}", peer.m_publicRefPos);
+
+            if (peer.m_serverSyncedPlayerData.TryGetValue("platformDisplayName", out var platformName))
+            {
+                sb.AppendFormat(" Platform name: {0}", platformName);
             }
         }
     }

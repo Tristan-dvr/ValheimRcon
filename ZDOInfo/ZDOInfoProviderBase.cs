@@ -21,6 +21,6 @@ namespace ValheimRcon.ZDOInfo
             return available;
         }
 
-        public abstract void AppendInfo(ZDO zdo, StringBuilder stringBuilder);
+        public abstract void AppendInfo(ZDO zdo, StringBuilder stringBuilder, bool detailed = true);
     }
 }

@@ -23,14 +23,12 @@ namespace ValheimRcon.Commands
 
         protected override string OnHandle(CommandArgs args)
         {
-            var optionalArgs = args.GetOptionalArguments();
             var force = false;
             _criterias.Clear();
             var deletingByRadius = false;
             string deletingPrefab = null;
-            foreach (var index in optionalArgs)
+            foreach (var (index, argument) in args.GetOptionalArguments())
             {
-                var argument = args.GetString(index);
                 switch (argument.ToLower())
                 {
                     case "-creator":

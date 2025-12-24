@@ -14,7 +14,7 @@ namespace ValheimRcon.Commands.Container
         {
             if (inventory.NrOfItems() == 0)
             {
-                return $"Container {prefabName} (ID: {zdo.m_uid.ID}:{zdo.m_uid.UserID}) is empty.";
+                return "Container is empty.";
             }
 
             var sb = new StringBuilder();
@@ -27,28 +27,9 @@ namespace ValheimRcon.Commands.Container
             foreach (var item in allItems)
             {
                 sb.AppendLine();
-
                 var itemName = item.m_dropPrefab?.name ?? item.m_shared.m_name;
-                sb.AppendFormat("[{0}] {1} x{2} quality:{3}", itemIndex, itemName, item.m_stack, item.m_quality);
-                if (item.m_variant != 0)
-                {
-                    sb.AppendFormat(" variant:{0}", item.m_variant);
-                }
-                if (item.m_crafterID != 0)
-                {
-                    sb.AppendFormat(" crafter:{0}({1})", item.m_crafterName, item.m_crafterID);
-                }
-                if (item.m_customData.Count > 0)
-                {
-                    sb.AppendFormat(" data:");
-                    var appendComma = false;
-                    foreach (var pair in item.m_customData)
-                    {
-                        if (appendComma) sb.Append(',');
-                        sb.AppendFormat("[{0}]:[{1}]", pair.Key, pair.Value);
-                        appendComma = true;
-                    }
-                }
+                sb.AppendFormat("[{0}] {1} ", itemIndex, itemName);
+                ZDOInfoUtil.AppendItemInfo(item, sb);
                 itemIndex++;
             }
 

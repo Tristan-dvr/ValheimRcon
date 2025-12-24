@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace ValheimRcon.Commands
+﻿namespace ValheimRcon.Commands
 {
     internal class SayPing : RconCommand
     {

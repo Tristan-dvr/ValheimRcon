@@ -10,15 +10,17 @@ namespace ValheimRcon.Commands.Container
 
         protected override string HandleInventory(CommandArgs args, ZDO zdo, Inventory inventory, string prefabName)
         {
-            var optionalArgs = args.GetOptionalArguments();
             var force = false;
             
-            foreach (var index in optionalArgs)
+            foreach (var (index, argument) in args.GetOptionalArguments())
             {
-                if (args.GetString(index) == "-force")
+                switch (argument)
                 {
-                    force = true;
-                    break;
+                    case "-force":
+                        force = true;
+                        break;
+                    default:
+                        return $"Unknown argument {argument}";
                 }
             }
 

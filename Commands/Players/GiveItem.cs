@@ -38,10 +38,8 @@ namespace ValheimRcon.Commands.Players
             var itemData = prefab.GetComponent<ItemDrop>().m_itemData;
             var sharedItemData = itemData.m_shared;
 
-            var optionalArgs = args.GetOptionalArguments();
-            foreach (var index in optionalArgs)
+            foreach (var (index, arg) in args.GetOptionalArguments())
             {
-                var arg = args.GetString(index);
                 switch (arg)
                 {
                     case "-count":

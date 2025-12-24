@@ -6,7 +6,7 @@ namespace ValheimRcon.ZDOInfo
     {
         private static readonly Inventory TempInventory = new Inventory("", null, 8, 5);
 
-        public override void AppendInfo(ZDO zdo, StringBuilder stringBuilder)
+        public override void AppendInfo(ZDO zdo, StringBuilder stringBuilder, bool detailed)
         {
             TempInventory.RemoveAll();
             var itemsData = zdo.GetString(ZDOVars.s_items);
@@ -17,7 +17,7 @@ namespace ValheimRcon.ZDOInfo
             }
             var items = TempInventory.m_inventory;
 
-            stringBuilder.Append(" Container: ");
+            stringBuilder.Append("Container: ");
             var count = items.Count;
             if (count == 0)
             {
