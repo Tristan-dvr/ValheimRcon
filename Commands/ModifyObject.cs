@@ -18,6 +18,7 @@ namespace ValheimRcon.Commands
             "-rotation <x> <y> <z> " +
             "-health <value> " +
             "-tag <tag> " +
+            "-prefab <prefab name> " +
             "-force (bypass security checks)";
 
         private readonly List<IZdoModification> _modifications = new List<IZdoModification>();
@@ -41,6 +42,7 @@ namespace ValheimRcon.Commands
 
             var optionalArgs = args.GetOptionalArguments();
             var force = false;
+            var targetPrefabName = string.Empty;
             _modifications.Clear();
             foreach (var (index, argument) in optionalArgs)
             {
@@ -57,6 +59,10 @@ namespace ValheimRcon.Commands
                         break;
                     case "-tag":
                         _modifications.Add(new TagModification(args.GetString(index + 1)));
+                        break;
+                    case "-prefab":
+                        targetPrefabName = args.GetString(index + 1);
+                        _modifications.Add(new PrefabModification(targetPrefabName));
                         break;
                     case "-force":
                         force = true;
@@ -84,6 +90,13 @@ namespace ValheimRcon.Commands
                 return $"Object is owned by an online player {ownerPlayer.GetPlayerInfo()} and cannot be modified.";
             }
 
+            if (!force
+                && !string.IsNullOrEmpty(targetPrefabName)
+                && !ZNetScene.instance.HasPrefab(targetPrefabName.GetStableHashCode()))
+            {
+                return $"Cannot find prefab with name {targetPrefabName}. If you know what you are doing, use -force option.";
+            }
+
             foreach (var modification in _modifications)
             {
                 modification.Apply(zdo);
@@ -92,6 +105,7 @@ namespace ValheimRcon.Commands
 
             builder.Clear();
             builder.AppendLine("Object modified successfully");
+            builder.AppendFormat("{0} ", zdo.GetPrefabName());
             ZDOInfoUtil.AppendInfo(zdo, builder);
             return builder.ToString().TrimEnd();
         }
