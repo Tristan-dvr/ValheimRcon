@@ -76,7 +76,9 @@ say Hello everyone!
 ```
 
 ## Custom commands
-If you are a modder and want to add your own RCON commands for your server, read [this documentation](https://github.com/Tristan-dvr/ValheimRcon/blob/master/add-custom-command.md).
+If you are a mod developer and want to add your own RCON commands for your server, please refer to the [documentation](https://github.com/Tristan-dvr/ValheimRcon/blob/master/add-custom-command.md).
+
+You can also extend object information display by registering custom ZDO info providers via `ZDOInfoUtil.RegisterInfoProvider()`.
 
 # Contacts
 If you have any questions / bug reports / suggestions for improvement or found incompatibility with another mod, feel free to contact me in discord `typedeff` or on GitHub 
