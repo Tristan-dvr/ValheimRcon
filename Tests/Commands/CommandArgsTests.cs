@@ -3,6 +3,7 @@ using ValheimRcon.Commands;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace ValheimRcon.Tests.Commands
 {
@@ -303,12 +304,8 @@ namespace ValheimRcon.Tests.Commands
 
             var result = commandArgs.GetOptionalArguments();
 
-            var indices = result.Select((_, arg) => arg).ToList();
-            Assert.AreEqual(expectedIndices.Length, indices.Count);
-            for (int i = 0; i < expectedIndices.Length; i++)
-            {
-                Assert.AreEqual(expectedIndices[i], indices[i]);
-            }
+            var indices = result.Select(value => value.Index).ToList();
+            Assert.AreEqual(expectedIndices, indices);
         }
 
         #endregion
@@ -367,6 +364,95 @@ namespace ValheimRcon.Tests.Commands
             var commandArgs = new CommandArgs(args);
 
             Assert.Throws<ArgumentException>(() => commandArgs.GetObjectId(1));
+        }
+
+        #endregion
+
+        #region GetVector3 Tests
+
+        [TestCase("1.5", "2.5", "3.5", 1.5f, 2.5f, 3.5f)]
+        [TestCase("0.0", "0.0", "0.0", 0.0f, 0.0f, 0.0f)]
+        [TestCase("-1.5", "-2.5", "-3.5", -1.5f, -2.5f, -3.5f)]
+        [TestCase("123.456", "789.012", "345.678", 123.456f, 789.012f, 345.678f)]
+        [TestCase("1.0", "2.0", "3.0", 1.0f, 2.0f, 3.0f)]
+        public void GetVector3_WithValidFloats_ShouldReturnCorrectValue(string x, string y, string z, float expectedX, float expectedY, float expectedZ)
+        {
+            var args = new[] { "command", x, y, z };
+            var commandArgs = new CommandArgs(args);
+
+            var result = commandArgs.GetVector3(1);
+
+            Assert.AreEqual(expectedX, result.x, 0.001f);
+            Assert.AreEqual(expectedY, result.y, 0.001f);
+            Assert.AreEqual(expectedZ, result.z, 0.001f);
+        }
+
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(5)]
+        [TestCase(-1)]
+        public void GetVector3_WithInvalidIndex_ShouldThrowArgumentException(int index)
+        {
+            var args = new[] { "command", "1.0", "2.0" };
+            var commandArgs = new CommandArgs(args);
+
+            Assert.Throws<ArgumentException>(() => commandArgs.GetVector3(index));
+        }
+
+        [TestCase("notanumber", "2.0", "3.0")]
+        [TestCase("1.0", "notanumber", "3.0")]
+        [TestCase("1.0", "2.0", "notanumber")]
+        public void GetVector3_WithInvalidFloats_ShouldThrowArgumentException(string x, string y, string z)
+        {
+            var args = new[] { "command", x, y, z };
+            var commandArgs = new CommandArgs(args);
+
+            Assert.Throws<ArgumentException>(() => commandArgs.GetVector3(1));
+        }
+
+        #endregion
+
+        #region GetVector2i Tests
+
+        [TestCase("10", "20", 10, 20)]
+        [TestCase("0", "0", 0, 0)]
+        [TestCase("-10", "-20", -10, -20)]
+        [TestCase("2147483647", "-2147483648", int.MaxValue, int.MinValue)]
+        [TestCase("123", "456", 123, 456)]
+        public void GetVector2i_WithValidIntegers_ShouldReturnCorrectValue(string x, string y, int expectedX, int expectedY)
+        {
+            var args = new[] { "command", x, y };
+            var commandArgs = new CommandArgs(args);
+
+            var result = commandArgs.GetVector2i(1);
+
+            Assert.AreEqual(expectedX, result.x);
+            Assert.AreEqual(expectedY, result.y);
+        }
+
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(3)]
+        [TestCase(-1)]
+        public void GetVector2i_WithInvalidIndex_ShouldThrowArgumentException(int index)
+        {
+            var args = new[] { "command", "10" };
+            var commandArgs = new CommandArgs(args);
+
+            Assert.Throws<ArgumentException>(() => commandArgs.GetVector2i(index));
+        }
+
+        [TestCase("notanumber", "20")]
+        [TestCase("10", "notanumber")]
+        [TestCase("12.34", "20")]
+        [TestCase("10", "12.34")]
+        public void GetVector2i_WithInvalidIntegers_ShouldThrowArgumentException(string x, string y)
+        {
+            var args = new[] { "command", x, y };
+            var commandArgs = new CommandArgs(args);
+
+            Assert.Throws<ArgumentException>(() => commandArgs.GetVector2i(1));
         }
 
         #endregion

@@ -60,7 +60,7 @@ namespace ValheimRcon.Core
                         if (success)
                         {
                             peer.SetAuthentificated(true);
-                            result = new RconPacket(packet.requestId, PacketType.Command, "Logic success");
+                            result = new RconPacket(packet.requestId, PacketType.Command, "Login success");
                         }
                         else
                         {

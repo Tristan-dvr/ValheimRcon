@@ -13,6 +13,13 @@ namespace ValheimRcon.Commands
                 args.GetFloat(index + 2));
         }
 
+        public static Vector2i GetVector2i(this CommandArgs args, int index)
+        {
+            return new Vector2i(
+                args.GetInt(index),
+                args.GetInt(index + 1));
+        }
+
         public static ObjectId GetObjectId(this CommandArgs args, int index)
         {
             var text = args.GetString(index);

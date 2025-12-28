@@ -2,7 +2,7 @@
 
 namespace ValheimRcon.ZDOInfo
 {
-    internal interface IZDOInfoProvider
+    public interface IZDOInfoProvider
     {
         bool IsAvailableTo(ZDO zdo);
         void AppendInfo(ZDO zdo, StringBuilder stringBuilder, bool detailed);

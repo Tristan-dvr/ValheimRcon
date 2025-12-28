@@ -71,7 +71,7 @@ namespace ValheimRcon.Tests.Core
             var response = peer.SentPackets[0];
             Assert.AreEqual(1, response.requestId);
             Assert.AreEqual(PacketType.Command, response.type);
-            Assert.AreEqual("Logic success", response.payload);
+            Assert.AreEqual("Login success", response.payload);
         }
 
         [TestCase("wrongpassword")]

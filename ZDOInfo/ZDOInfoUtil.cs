@@ -1,13 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 using static ItemDrop;
 
 namespace ValheimRcon.ZDOInfo
 {
-    internal static class ZDOInfoUtil
+    public static class ZDOInfoUtil
     {
-        private static readonly List<IZDOInfoProvider> infoProviders = new List<IZDOInfoProvider>()
-        {
+        private static readonly CustomZDOInfoProvider _externalProvider = new CustomZDOInfoProvider();
+
+        private static readonly CustomZDOInfoProvider _globalProvider = new CustomZDOInfoProvider(
             new CommonZDOInfoProvider(),
             new BuildingZDOInfoProvider(),
             new ItemDropZDOInfoProvider(),
@@ -20,22 +20,11 @@ namespace ValheimRcon.ZDOInfo
             new TombStoneZDOInfoProvider(),
             new SignZDOInfoProvider(),
             new PortalZDOInfoProvider(),
-        };
+            _externalProvider);
 
         public static void AppendInfo(ZDO zdo, StringBuilder stringBuilder, bool detailed = true)
         {
-            var hasAny = false;
-            foreach (var provider in infoProviders)
-            {
-                if (!provider.IsAvailableTo(zdo))
-                    continue;
-
-                if (hasAny)
-                    stringBuilder.Append(' ');
-
-                provider.AppendInfo(zdo, stringBuilder, detailed);
-                hasAny = true;
-            }
+            _globalProvider.AppendInfo(zdo, stringBuilder, detailed);
 
             if (!zdo.Persistent)
             {
@@ -62,6 +51,11 @@ namespace ValheimRcon.ZDOInfo
                     stringBuilder.Append($" '{data.Key}'='{data.Value}'");
                 }
             }
+        }
+
+        public static void RegisterInfoProvider(IZDOInfoProvider provider)
+        {
+            _externalProvider.AddProvider(provider);
         }
     }
 }

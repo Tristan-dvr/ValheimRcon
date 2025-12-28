@@ -13,6 +13,7 @@ namespace ValheimRcon.Commands
         public override string Description => "Delete objects matching all search criteria. " +
             "Usage (with optional arguments): deleteObjects " +
             "-near <x> <y> <z> <radius> " +
+            "-zone <x> <y> " +
             "-prefab <prefab> " +
             "-creator <creator id> " +
             "-id <id:userid> " +
@@ -25,7 +26,7 @@ namespace ValheimRcon.Commands
         {
             var force = false;
             _criterias.Clear();
-            var deletingByRadius = false;
+            var deletingByPosition = false;
             string deletingPrefab = null;
             foreach (var (index, argument) in args.GetOptionalArguments())
             {
@@ -43,7 +44,11 @@ namespace ValheimRcon.Commands
                         break;
                     case "-near":
                         _criterias.Add(new NearCriteria(args.GetVector3(index + 1), args.GetFloat(index + 4)));
-                        deletingByRadius = true;
+                        deletingByPosition = true;
+                        break;
+                    case "-zone":
+                        _criterias.Add(new ZoneCriteria(args.GetVector2i(index + 1)));
+                        deletingByPosition = true;
                         break;
                     case "-tag":
                         _criterias.Add(new TagCriteria(args.GetString(index + 1)));
@@ -70,9 +75,9 @@ namespace ValheimRcon.Commands
                 return "No objects found matching the provided criteria.";
             }
 
-            if (deletingByRadius && _criterias.Count == 1)
+            if (deletingByPosition && _criterias.Count == 1)
             {
-                return "Must provide at least 1 more criteria if use -near";
+                return "Must provide at least 1 more criteria if use -near or -zone";
             }
 
             if (!string.IsNullOrEmpty(deletingPrefab)

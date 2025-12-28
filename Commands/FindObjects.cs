@@ -13,6 +13,7 @@ namespace ValheimRcon.Commands
         public override string Description => "Find objects matching all search criteria. " +
             "Usage (with optional arguments): findObjects " +
             "-near <x> <y> <z> <radius> " +
+            "-zone <x> <y> " +
             "-prefab <prefab> " +
             "-creator <creator id> " +
             "-id <id:userid> " +
@@ -44,6 +45,9 @@ namespace ValheimRcon.Commands
                         break;
                     case "-near":
                         _criterias.Add(new NearCriteria(args.GetVector3(index + 1), args.GetFloat(index + 4)));
+                        break;
+                    case "-zone":
+                        _criterias.Add(new ZoneCriteria(args.GetVector2i(index + 1)));
                         break;
                     case "-tag-old":
                         _criterias.Add(new OldTagCriteria(args.GetString(index + 1)));

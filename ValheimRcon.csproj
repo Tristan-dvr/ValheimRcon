@@ -124,6 +124,7 @@
     <Compile Include="Commands\Search\TagCriteria.cs" />
     <Compile Include="Commands\Search\NearCriteria.cs" />
     <Compile Include="Commands\Search\OldTagCriteria.cs" />
+    <Compile Include="Commands\Search\ZoneCriteria.cs" />
     <Compile Include="Commands\ServerLogs.cs" />
     <Compile Include="Commands\ShowMessage.cs" />
     <Compile Include="Commands\Container\ContainerRconCommand.cs" />
@@ -165,6 +166,7 @@
     <Compile Include="ZDOInfo\BuildingZDOInfoProvider.cs" />
     <Compile Include="ZDOInfo\CharacterZDOInfoProvider.cs" />
     <Compile Include="ZDOInfo\ContainerZDOInfoProvider.cs" />
+    <Compile Include="ZDOInfo\CustomZDOInfoProvider.cs" />
     <Compile Include="ZDOInfo\GuardStoneZDOInfoProvider.cs" />
     <Compile Include="ZDOInfo\ItemDropZDOInfoProvider.cs" />
     <Compile Include="ZDOInfo\ArmorStandZDOInfoProvider.cs" />

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ValheimRcon.ZDOInfo
 {
-    internal abstract class ZDOInfoProviderBase<T> : IZDOInfoProvider
+    public abstract class ZDOInfoProviderBase<T> : IZDOInfoProvider
         where T : Component
     {
         private readonly Dictionary<int, bool> _prefabs = new Dictionary<int, bool>();
