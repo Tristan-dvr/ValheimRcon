@@ -2,7 +2,7 @@
 - Added `-zone <x> <y>` parameter to `findObjects` and `deleteObjects` commands for searching/deleting objects by zone coordinates
 - Added `-prefab <prefab name>` option to `modifyObject` command to change object prefab
 - Added `-detailed` flag to `findObjects` command to show/hide detailed object information (like rotation, support, extra item information etc.)
-- Fixed an issue when sending large files to Discord (could occur when using -findObjects if more than 100k objects were found and the file size exceeded 10mb, which exceeds Discord’s file upload limit)
+- Fixed an issue when sending large files to Discord (could occur when using -findObjects if more than 100k objects were found and the file size exceeded 10mb, which exceeds Discord's file upload limit)
     - Such files are now not sent to Discord and are instead saved to disk on the server
 - Improved object information display with better formatting and type-specific details
 - Enhanced ZDO info system:
