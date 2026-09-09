@@ -24,5 +24,10 @@ namespace ValheimRcon
         {
             return string.Format("({0} {1})", vector.x, vector.y);
         }
+
+        public static string ToDisplayFormat(this Vector2s vector)
+        {
+            return string.Format("({0} {1})", vector.x, vector.y);
+        }
     }
 }

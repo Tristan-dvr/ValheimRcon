@@ -21,7 +21,7 @@ namespace ValheimRcon
 
         public const string Guid = "org.tristan.rcon";
         public const string Name = "Valheim Rcon";
-        public const string Version = "1.5.1";
+        public const string Version = "1.6.0";
 
         private const int MaxDiscordMessageLength = 1900;
         private const int TruncatedMessageLength = 200;
@@ -221,7 +221,6 @@ namespace ValheimRcon
                 {
                     m_name = name,
                     m_userInfo = new ZNet.CrossNetworkUserInfo { m_displayName = name, m_id = CommandsUserInfo.UserId },
-                    m_serverAssignedDisplayName = name,
                 };
                 __instance.m_players.Add(playerInfo);
             }

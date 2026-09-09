@@ -1,3 +1,6 @@
+### 1.6.0
+- Fixed compatibility with new game version
+
 ### 1.5.1
 - Added `-zone <x> <y>` parameter to `findObjects` and `deleteObjects` commands for searching/deleting objects by zone coordinates
 - Added `-prefab <prefab name>` option to `modifyObject` command to change object prefab

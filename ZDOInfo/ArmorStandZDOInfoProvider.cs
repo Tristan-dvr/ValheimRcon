@@ -26,7 +26,7 @@ namespace ValheimRcon.ZDOInfo
 
                 if (detailed)
                 {
-                    ItemDrop.LoadFromZDO(i, _tempData, zdo);
+                    ItemDrop.LoadFromZDO(_tempData, zdo, i);
 
                     stringBuilder.AppendFormat("( {0} ", item);
                     ZDOInfoUtil.AppendItemInfo(_tempData, stringBuilder);

@@ -8,22 +8,34 @@ namespace ValheimRcon.Commands
 {
     internal class ServerLogs : IRconCommand
     {
-        private const int MaxLinesToDisplay = 5;
+        private const int DefaultLinesToDisplay = 5;
         private readonly StringBuilder _builder = new StringBuilder();
 
         public string Command => "logs";
 
-        public string Description => "Get the server logs";
+        public string Description => "Get the server logs <optional> -lines <number>";
 
         public Task<CommandResult> HandleCommandAsync(CommandArgs args)
         {
             var sourcePath = Path.Combine(Paths.BepInExRootPath, "LogOutput.log");
             if (!File.Exists(sourcePath)) return Task.FromResult(CommandResult.WithText("No logs"));
 
+            var linesCount = DefaultLinesToDisplay;
+            var optionalArgs = args.GetOptionalArguments();
+            foreach (var arg in optionalArgs)
+            {
+                switch (arg.Argument)
+                {
+                    case "lines":
+                        linesCount = args.GetInt(arg.Index + 1);
+                        break;
+                }
+            }
+
             var targetPath = Path.Combine(Paths.CachePath, "LogOutput.log");
             File.Copy(sourcePath, targetPath, true);
             var lines = File.ReadAllLines(targetPath);
-            var startIndex = Math.Max(lines.Length - MaxLinesToDisplay - 1, 0);
+            var startIndex = Math.Max(lines.Length - linesCount - 1, 0);
 
             _builder.Clear();
             for (var i = startIndex; i < lines.Length; i++)
