@@ -1,3 +1,6 @@
+### 1.6.1
+- Fixed an error when players connect to the server
+
 ### 1.6.0
 - Fixed compatibility with new game version
 
