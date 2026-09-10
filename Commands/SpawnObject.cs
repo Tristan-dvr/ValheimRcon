@@ -80,10 +80,14 @@ namespace ValheimRcon.Commands
 
                 if (newPrefab.TryGetComponent<Character>(out var character))
                     character.SetLevel(level);
-                if (newPrefab.TryGetComponent<ItemDrop>(out var itemDrop))
-                    itemDrop.SetQuality(level);
 
                 var zdo = newPrefab.GetComponent<ZNetView>().GetZDO();
+                if (newPrefab.TryGetComponent<ItemDrop>(out var itemDrop) && level >= 1)
+                {
+                    itemDrop.SetQuality(level);
+                    ItemDrop.SaveToZDO(itemDrop.m_itemData, zdo);
+                }
+
                 createdObjects.Add(zdo);
                 if (!string.IsNullOrEmpty(tag))
                 {

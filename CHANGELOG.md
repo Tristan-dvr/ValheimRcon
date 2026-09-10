@@ -1,3 +1,8 @@
+### 1.6.2
+- Fixed container inventory commands (show/add/remove/clear) after the latest Valheim update
+- Fixed item names on item stands and armor stands in object info
+- Fixed item quality when spawning items with `-level`
+
 ### 1.6.1
 - Fixed an error when players connect to the server
 

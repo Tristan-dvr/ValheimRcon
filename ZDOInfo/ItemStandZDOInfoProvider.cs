@@ -8,15 +8,15 @@ namespace ValheimRcon.ZDOInfo
 
         public override void AppendInfo(ZDO zdo, StringBuilder stringBuilder, bool detailed)
         {
-            var item = zdo.GetString(ZDOVars.s_item);
+            var itemHash = zdo.GetInt(ZDOVars.s_item, 0);
             stringBuilder.AppendFormat(" Attached item: ");
-            if (string.IsNullOrEmpty(item))
+            if (itemHash == 0)
             {
                 stringBuilder.Append("<empty>");
                 return;
             }
 
-            stringBuilder.Append(item);
+            stringBuilder.Append(ZdoUtils.GetPrefabName(itemHash));
             if (detailed)
             {
                 stringBuilder.Append(' ');

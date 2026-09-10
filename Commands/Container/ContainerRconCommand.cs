@@ -31,10 +31,10 @@ namespace ValheimRcon.Commands.Container
                 return $"Object {prefabName} is not a container.";
             }
 
-            var itemsData = zdo.GetString(ZDOVars.s_items, "");
+            var itemsData = zdo.GetByteArray(ZDOVars.s_items, null);
             var inventory = new Inventory(containerComponent.m_name, containerComponent.m_bkg, containerComponent.m_width, containerComponent.m_height);
-            
-            if (!string.IsNullOrEmpty(itemsData))
+
+            if (itemsData != null)
             {
                 var package = new ZPackage(itemsData);
                 inventory.Load(package);
@@ -49,7 +49,7 @@ namespace ValheimRcon.Commands.Container
         {
             var package = new ZPackage();
             inventory.Save(package);
-            zdo.Set(ZDOVars.s_items, package.GetBase64());
+            zdo.Set(ZDOVars.s_items, package.GetArray());
             zdo.SetZdoModified();
         }
     }

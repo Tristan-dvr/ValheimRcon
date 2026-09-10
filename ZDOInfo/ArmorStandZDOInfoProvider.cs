@@ -17,9 +17,11 @@ namespace ValheimRcon.ZDOInfo
             var hasAny = false;
             for (var i = 0; i < count; i++)
             {
-                var item = zdo.GetString($"{i}_item");
-                if (string.IsNullOrEmpty(item))
+                var itemHash = zdo.GetInt($"{i}_item".GetStableHashCode(), 0);
+                if (itemHash == 0)
                     continue;
+
+                var item = ZdoUtils.GetPrefabName(itemHash);
 
                 if (hasAny)
                     stringBuilder.Append(',');
@@ -37,7 +39,7 @@ namespace ValheimRcon.ZDOInfo
                     stringBuilder.Append(item);
                 }
 
-                    hasAny = true;
+                hasAny = true;
             }
 
             if (!hasAny)
