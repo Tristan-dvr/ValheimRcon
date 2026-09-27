@@ -21,12 +21,13 @@ namespace ValheimRcon
 
         public const string Guid = "org.tristan.rcon";
         public const string Name = "Valheim Rcon";
-        public const string Version = "1.6.2";
+        public const string Version = "1.6.3";
 
         private const int MaxDiscordMessageLength = 1900;
         private const int TruncatedMessageLength = 200;
 
         public static ConfigEntry<string> DiscordUrl;
+        public static ConfigEntry<string> DiscordWebhookName;
         public static ConfigEntry<string> Password;
         public static ConfigEntry<int> Port;
         public static ConfigEntry<string> ServerChatName;
@@ -59,6 +60,7 @@ namespace ValheimRcon
             WhiteListConfig = Config.Bind("1. Rcon", "Whitelist IP mask", "", "Comma-separated list of IP addresses or masks (e.g., 192.168.1.0/24, 10.0.0.1)");
             BlackListConfig = Config.Bind("1. Rcon", "Blacklist IP mask", "", "Comma-separated list of IP addresses or masks (e.g., 192.168.1.0/24, 10.0.0.1)");
             DiscordUrl = Config.Bind("2. Discord", "Webhook url", "", "Discord webhook for sending command results");
+            DiscordWebhookName = Config.Bind("2. Discord", "Webhook name", "RCON", "Username override for Discord webhook messages. Leave empty to use the webhook's default name and avatar");
             ServerChatName = Config.Bind("3. Chat", "Server name", "Server", "Name of server to display messages sent with rcon command");
 
             DiscordSecurityReportPrefix = Config.Bind("4. Security", "Message prefix", "@here Security alert", "Prefix attached to every security report");

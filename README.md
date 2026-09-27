@@ -22,6 +22,7 @@ This plugin adds RCON protocol support to your Valheim server.
 		- Blacklist: comma-separated list of blocked IP addresses or CIDR masks
 		- If whitelist is empty, all IPs are allowed (except blacklisted)
 	- Configure Discord webhook to see command results in your Discord (optional but recommended)
+	- Optionally set Discord webhook name (default: RCON). Leave empty to use the webhook's default name and avatar
 	- Configure security Discord webhook for security incident reports (optional but recommended)
 4. Restart the server to apply the changes
 5. Connect to the server using an RCON client (web or desktop application)

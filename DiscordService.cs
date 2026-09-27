@@ -6,8 +6,6 @@ namespace ValheimRcon
 {
     internal class DiscordService : IDisposable
     {
-        private const string Name = "RCON";
-
         private readonly IDisposable _thread;
         private readonly ConcurrentQueue<Message> _queue = new ConcurrentQueue<Message>();
 
@@ -36,17 +34,18 @@ namespace ValheimRcon
 
             try
             {
+                var userName = Plugin.DiscordWebhookName.Value;
                 var filePath = message.filePath;
                 if (string.IsNullOrEmpty(filePath))
                 {
-                    Discord.Send(message.text, Name, message.url);
+                    Discord.Send(message.text, userName, message.url);
                 }
                 else
                 {
                     var fileName = Path.GetFileName(filePath);
                     var fileExtension = Path.GetExtension(filePath);
 
-                    Discord.SendFile(message.text, fileName, fileExtension, filePath, Name, message.url);
+                    Discord.SendFile(message.text, fileName, fileExtension, filePath, userName, message.url);
                 }
 
                 Log.Debug($"Sent to discord (symbols:{message.text.Length})");

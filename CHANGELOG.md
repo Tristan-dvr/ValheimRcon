@@ -1,3 +1,6 @@
+### 1.6.3
+- Added a Discord webhook name setting so you can customize the bot display name, or leave it empty to keep the webhook's default name and avatar
+
 ### 1.6.2
 - Fixed container inventory commands (show/add/remove/clear) after the latest Valheim update
 - Fixed item names on item stands and armor stands in object info

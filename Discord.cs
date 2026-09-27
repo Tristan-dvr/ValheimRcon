@@ -12,9 +12,10 @@ namespace ValheimRcon
         {
             var postParameters = new Dictionary<string, object>
             {
-                { "username", userName },
                 { "content", mssgBody }
             };
+            if (!string.IsNullOrEmpty(userName))
+                postParameters["username"] = userName;
 
             var webResponse = FormUpload.MultipartFormDataPost(webhook, postParameters);
 
@@ -49,10 +50,10 @@ namespace ValheimRcon
                 { "filename", filename },
                 { "fileformat", fileformat },
                 { "file", new FormUpload.FileParameter(data, filename, "application/msexcel") },
-
-                { "username", userName },
                 { "content", mssgBody }
             };
+            if (!string.IsNullOrEmpty(userName))
+                postParameters["username"] = userName;
 
             // Create request and receive response
             HttpWebResponse webResponse = FormUpload.MultipartFormDataPost(webhook, postParameters);
