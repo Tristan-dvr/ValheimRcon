@@ -87,6 +87,7 @@ namespace ValheimRcon.Commands.Container
             }
 
             var clonedItem = itemData.Clone();
+            clonedItem.m_dropPrefab = itemPrefab;
             clonedItem.m_quality = quality;
             clonedItem.m_variant = variant;
             clonedItem.m_stack = count;
