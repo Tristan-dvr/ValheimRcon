@@ -1,3 +1,8 @@
+### 1.6.4
+- Fixed items added with `addItemToContainer` disappearing from the container
+- `logs` command now shows the last 10 lines by default (was 5)
+- Fixed `logs -lines <number>` showing one extra line
+
 ### 1.6.3
 - Added a Discord webhook name setting so you can customize the bot display name, or leave it empty to keep the webhook's default name and avatar
 

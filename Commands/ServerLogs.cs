@@ -8,7 +8,7 @@ namespace ValheimRcon.Commands
 {
     internal class ServerLogs : IRconCommand
     {
-        private const int DefaultLinesToDisplay = 5;
+        private const int DefaultLinesToDisplay = 10;
         private readonly StringBuilder _builder = new StringBuilder();
 
         public string Command => "logs";
@@ -35,7 +35,7 @@ namespace ValheimRcon.Commands
             var targetPath = Path.Combine(Paths.CachePath, "LogOutput.log");
             File.Copy(sourcePath, targetPath, true);
             var lines = File.ReadAllLines(targetPath);
-            var startIndex = Math.Max(lines.Length - linesCount - 1, 0);
+            var startIndex = Math.Max(lines.Length - linesCount, 0);
 
             _builder.Clear();
             for (var i = startIndex; i < lines.Length; i++)

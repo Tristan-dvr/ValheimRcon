@@ -21,7 +21,7 @@ namespace ValheimRcon
 
         public const string Guid = "org.tristan.rcon";
         public const string Name = "Valheim Rcon";
-        public const string Version = "1.6.3";
+        public const string Version = "1.6.4";
 
         private const int MaxDiscordMessageLength = 1900;
         private const int TruncatedMessageLength = 200;

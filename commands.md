@@ -362,8 +362,16 @@ Saves the current world state
 **Usage:** `save`
 
 ### logs
-Gets server logs (last 5 lines)  
-**Usage:** `logs`
+Gets the last lines of the server log and attaches the full log file  
+**Usage:** `logs [options]`
+
+**Options:**
+- `-lines <number>` - number of last lines to show (default: 10)
+
+```
+logs
+logs -lines 50
+```
 
 ### consoleCommand
 Executes a console command on the server  
