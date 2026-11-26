@@ -1,3 +1,6 @@
+### 1.6.5
+- Fixed `logs -lines <number>` being ignored and always showing the default 10 lines
+
 ### 1.6.4
 - Fixed items added with `addItemToContainer` disappearing from the container
 - `logs` command now shows the last 10 lines by default (was 5)

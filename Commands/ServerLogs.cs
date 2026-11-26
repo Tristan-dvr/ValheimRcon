@@ -26,7 +26,7 @@ namespace ValheimRcon.Commands
             {
                 switch (arg.Argument)
                 {
-                    case "lines":
+                    case "-lines":
                         linesCount = args.GetInt(arg.Index + 1);
                         break;
                 }
